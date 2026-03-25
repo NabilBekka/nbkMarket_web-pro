@@ -1,0 +1,39 @@
+.card {
+  background: var(--white);
+  border-radius: 10px;
+  padding: 16px;
+  border: 1px solid var(--card-border);
+}
+
+.label {
+  font-size: 11px;
+  color: var(--text-gray);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-top: 4px;
+}
+
+.change {
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.up {
+  color: #4CAF50;
+}
+
+.down {
+  color: var(--danger);
+}
+
+.neutral {
+  color: var(--text-gray);
+}

@@ -6,8 +6,38 @@
   box-sizing: border-box;
 }
 
-html,
-body {
+:root {
+  --green-dark: #1E2B1E;
+  --green-mid: #273527;
+  --green-light: #334D33;
+  --accent: #8BC34A;
+  --bg-gray: #F5F7F2;
+  --text-dark: #1E2B1E;
+  --text-gray: #888888;
+  --white: #ffffff;
+  --card-border: #eeeeee;
+  --badge-new-bg: #E8F5E9;
+  --badge-new-text: #2E7D32;
+  --badge-pending-bg: #FFF3E0;
+  --badge-pending-text: #E65100;
+  --badge-done-bg: #E3F2FD;
+  --badge-done-text: #1565C0;
+  --danger: #E53935;
+}
+
+html {
   height: 100%;
-  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--green-dark);
+}
+
+body {
+  min-height: 100%;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--bg-gray);
+  color: var(--text-dark);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
 }
