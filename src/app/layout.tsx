@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "@/styles/globals.css";
+import { LangProvider } from "@/context/LangContext";
 
 export const metadata: Metadata = {
   title: "NBK Market Pro",
-  description: "Espace commerçant - Gérez votre boutique en ligne",
+  description: "The professional platform for Algerian merchants",
 };
 
 export default function RootLayout({
@@ -12,8 +13,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr">
-      <body>{children}</body>
+    <html lang="en">
+      <body>
+        <LangProvider>{children}</LangProvider>
+      </body>
     </html>
   );
 }

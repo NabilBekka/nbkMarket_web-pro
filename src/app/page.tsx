@@ -1,41 +1,43 @@
-import Sidebar from "@/components/Sidebar";
-import StatCard from "@/components/StatCard";
-import ContactsTable from "@/components/ContactsTable";
-import TopProducts from "@/components/TopProducts";
+"use client";
+
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { useLang } from "@/context/LangContext";
 import styles from "./page.module.css";
 
-const stats = [
-  { label: "Vues ce mois", value: "4 821", change: "↑ 18% vs mois dernier", changeType: "up" as const },
-  { label: "Contacts reçus", value: "127", change: "↑ 24%", changeType: "up" as const },
-  { label: "Produits actifs", value: "48", change: "3 en rupture", changeType: "neutral" as const },
-  { label: "Note moyenne", value: "⭐ 4.8", change: "127 avis", changeType: "neutral" as const },
-];
-
 export default function Home() {
+  const { t } = useLang();
+
   return (
-    <div className={styles.layout}>
-      <Sidebar />
+    <main>
+      <Header />
 
-      <main className={styles.main}>
-        <div className={styles.topBar}>
-          <div className={styles.welcome}>
-            <h1>Bonjour Karim 👋</h1>
-            <p>El Yasmine Store · Alger Centre</p>
-          </div>
-          <button className={styles.newProductBtn}>＋ Nouveau produit</button>
-        </div>
+      <section className={styles.hero}>
+        <span className={styles.badge}>{t.landing.badge}</span>
+        <h1 className={styles.title}>
+          {t.landing.title}
+          <br />
+          <span className={styles.titleAccent}>{t.landing.titleAccent}</span>
+        </h1>
+        <p className={styles.subtitle}>{t.landing.subtitle}</p>
+        <a href="/create-shop" className={styles.cta}>
+          {t.landing.cta}
+        </a>
+      </section>
 
-        <div className={styles.statsGrid}>
-          {stats.map((stat) => (
-            <StatCard key={stat.label} {...stat} />
+      <section className={styles.features}>
+        <div className={styles.featuresGrid}>
+          {t.landing.features.map((feature) => (
+            <div key={feature.title} className={styles.featureCard}>
+              <span className={styles.featureIcon}>{feature.icon}</span>
+              <h3 className={styles.featureTitle}>{feature.title}</h3>
+              <p className={styles.featureDesc}>{feature.desc}</p>
+            </div>
           ))}
         </div>
+      </section>
 
-        <div className={styles.columns}>
-          <ContactsTable />
-          <TopProducts />
-        </div>
-      </main>
-    </div>
+      <Footer />
+    </main>
   );
 }

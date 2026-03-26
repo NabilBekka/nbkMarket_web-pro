@@ -18,10 +18,6 @@
   --card-border: #eeeeee;
   --badge-new-bg: #E8F5E9;
   --badge-new-text: #2E7D32;
-  --badge-pending-bg: #FFF3E0;
-  --badge-pending-text: #E65100;
-  --badge-done-bg: #E3F2FD;
-  --badge-done-text: #1565C0;
   --danger: #E53935;
 }
 
@@ -40,4 +36,11 @@ body {
 a {
   text-decoration: none;
   color: inherit;
+}
+
+@media (min-width: 2200px) {
+  body {
+    max-width: 2200px;
+    margin: 0 auto;
+  }
 }
