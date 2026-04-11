@@ -7,22 +7,19 @@ import ForgotPasswordForm from "./ForgotPasswordForm";
 
 type View = "login" | "forgot";
 
-interface AuthModalProps {
-  onClose: () => void;
-}
-
-export default function AuthModal({ onClose }: AuthModalProps) {
+export default function AuthModal({ onClose }: { onClose: () => void }) {
   const [view, setView] = useState<View>("login");
 
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <button className={styles.closeBtn} onClick={onClose}>
-          ✕
-        </button>
+        <button className={styles.closeBtn} onClick={onClose}>✕</button>
 
         {view === "login" && (
-          <LoginForm onSwitchForgot={() => setView("forgot")} />
+          <LoginForm
+            onSwitchForgot={() => setView("forgot")}
+            onSuccess={onClose}
+          />
         )}
 
         {view === "forgot" && (

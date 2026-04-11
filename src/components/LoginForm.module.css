@@ -11,6 +11,77 @@
   margin-bottom: 24px;
 }
 
+.serverError {
+  background: #FFF0F0;
+  color: #E53935;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  border: 1px solid #FFCDD2;
+}
+
+.googleBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: var(--white);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.googleBtn:hover {
+  background: var(--bg-gray);
+  border-color: #ccc;
+}
+
+.googleBtnDisabled {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  background: #f9f9f9;
+  font-size: 14px;
+  font-weight: 500;
+  color: #bbb;
+  cursor: not-allowed;
+}
+
+.googleIcon {
+  flex-shrink: 0;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 1px;
+  background: #eee;
+}
+
+.dividerText {
+  font-size: 12px;
+  color: var(--text-gray);
+}
+
 .field {
   margin-bottom: 16px;
 }
@@ -151,4 +222,11 @@
 
 .submitBtn:hover {
   opacity: 0.9;
+}
+
+.bottomText {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-gray);
+  margin-top: 16px;
 }

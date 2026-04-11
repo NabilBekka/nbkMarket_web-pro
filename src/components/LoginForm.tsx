@@ -3,28 +3,31 @@
 import { useState, useEffect } from "react";
 import styles from "./LoginForm.module.css";
 import { useLang } from "@/context/LangContext";
+import { useAuth } from "@/context/AuthContext";
+import { api } from "@/services/api";
 
-interface LoginFormProps {
+interface Props {
   onSwitchForgot: () => void;
+  onSuccess: () => void;
 }
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export default function LoginForm({ onSwitchForgot }: LoginFormProps) {
+export default function LoginForm({ onSwitchForgot, onSuccess }: Props) {
   const { t } = useLang();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPw, setShowPw] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [touchedPw, setTouchedPw] = useState(false);
   const [touchedEmail, setTouchedEmail] = useState(false);
+  const [touchedPw, setTouchedPw] = useState(false);
+  const [serverError, setServerError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("nbk-pro-remember-email");
-    if (saved) {
-      setEmail(saved);
-      setRememberMe(true);
-    }
+    if (saved) { setEmail(saved); setRememberMe(true); }
   }, []);
 
   const emailValid = emailRegex.test(email);
@@ -37,27 +40,36 @@ export default function LoginForm({ onSwitchForgot }: LoginFormProps) {
     special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
   };
 
-  const allValid = Object.values(checks).every(Boolean) && emailValid;
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouchedPw(true);
     setTouchedEmail(true);
-    if (!allValid) return;
+    setServerError("");
+    if (!emailValid) return;
 
-    if (rememberMe) {
-      localStorage.setItem("nbk-pro-remember-email", email);
-    } else {
-      localStorage.removeItem("nbk-pro-remember-email");
+    setLoading(true);
+    const res = await api.auth.login({ email, password });
+    setLoading(false);
+
+    if (res.error) {
+      setServerError(t.login.error);
+      return;
     }
 
-    // TODO: API call
+    if (res.data) {
+      if (rememberMe) localStorage.setItem("nbk-pro-remember-email", email);
+      else localStorage.removeItem("nbk-pro-remember-email");
+      login(res.data.accessToken, res.data.user as Parameters<typeof login>[1]);
+      onSuccess();
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} noValidate>
       <h2 className={styles.title}>{t.login.title}</h2>
       <p className={styles.subtitle}>{t.login.subtitle}</p>
+
+      {serverError && <p className={styles.serverError}>{serverError}</p>}
 
       <div className={styles.field}>
         <label className={styles.label}>{t.login.email}</label>
@@ -69,7 +81,6 @@ export default function LoginForm({ onSwitchForgot }: LoginFormProps) {
           onChange={(e) => setEmail(e.target.value)}
           onBlur={() => setTouchedEmail(true)}
           required
-          autoComplete="email"
         />
         {touchedEmail && !emailValid && email.length > 0 && (
           <p className={styles.errorText}>{t.login.emailError}</p>
@@ -80,54 +91,31 @@ export default function LoginForm({ onSwitchForgot }: LoginFormProps) {
         <label className={styles.label}>{t.login.password}</label>
         <div className={styles.passwordWrap}>
           <input
-            type={showPassword ? "text" : "password"}
+            type={showPw ? "text" : "password"}
             className={styles.input}
             placeholder={t.login.passwordPlaceholder}
             value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              setTouchedPw(true);
-            }}
+            onChange={(e) => { setPassword(e.target.value); setTouchedPw(true); }}
             required
           />
-          <button
-            type="button"
-            className={styles.eyeBtn}
-            onClick={() => setShowPassword(!showPassword)}
-          >
-            {showPassword ? "🙈" : "👁️"}
+          <button type="button" className={styles.eyeBtn} onClick={() => setShowPw(!showPw)}>
+            {showPw ? "🙈" : "👁️"}
           </button>
         </div>
-
         {touchedPw && password.length > 0 && (
           <div className={styles.checks}>
-            <span className={checks.length ? styles.checkOk : styles.checkFail}>
-              {checks.length ? "✓" : "✗"} {t.login.checks.length}
-            </span>
-            <span className={checks.uppercase ? styles.checkOk : styles.checkFail}>
-              {checks.uppercase ? "✓" : "✗"} {t.login.checks.uppercase}
-            </span>
-            <span className={checks.lowercase ? styles.checkOk : styles.checkFail}>
-              {checks.lowercase ? "✓" : "✗"} {t.login.checks.lowercase}
-            </span>
-            <span className={checks.number ? styles.checkOk : styles.checkFail}>
-              {checks.number ? "✓" : "✗"} {t.login.checks.number}
-            </span>
-            <span className={checks.special ? styles.checkOk : styles.checkFail}>
-              {checks.special ? "✓" : "✗"} {t.login.checks.special}
-            </span>
+            {Object.entries(checks).map(([k, v]) => (
+              <span key={k} className={v ? styles.checkOk : styles.checkFail}>
+                {v ? "✓" : "✗"} {t.login.checks[k as keyof typeof t.login.checks]}
+              </span>
+            ))}
           </div>
         )}
       </div>
 
       <div className={styles.optionsRow}>
         <label className={styles.rememberLabel}>
-          <input
-            type="checkbox"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-            className={styles.checkbox}
-          />
+          <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className={styles.checkbox} />
           {t.login.rememberMe}
         </label>
         <button type="button" className={styles.linkBtn} onClick={onSwitchForgot}>
@@ -135,9 +123,14 @@ export default function LoginForm({ onSwitchForgot }: LoginFormProps) {
         </button>
       </div>
 
-      <button type="submit" className={styles.submitBtn}>
-        {t.login.submit}
+      <button type="submit" className={styles.submitBtn} disabled={loading}>
+        {loading ? "..." : t.login.submit}
       </button>
+
+      <p className={styles.bottomText}>
+        {t.login.noAccount}{" "}
+        <a href="/create-shop" className={styles.linkBtn}>{t.login.createShop}</a>
+      </p>
     </form>
   );
 }
