@@ -25,11 +25,30 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState(""); const [showConfirmPw, setShowConfirmPw] = useState(false);
   const [showEditPw, setShowEditPw] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false); const [saveError, setSaveError] = useState(""); const [saveLoading, setSaveLoading] = useState(false);
-  const [forgotSent, setForgotSent] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotStep, setForgotStep] = useState<"code" | "done">("code");
+  const [forgotCode, setForgotCode] = useState(""); const [forgotNewPw, setForgotNewPw] = useState(""); const [showForgotNewPw, setShowForgotNewPw] = useState(false);
+  const [forgotError, setForgotError] = useState(""); const [forgotLoading, setForgotLoading] = useState(false);
   const [deletePassword, setDeletePassword] = useState(""); const [showDeletePw, setShowDeletePw] = useState(false);
   const [deleteError, setDeleteError] = useState(""); const [showDeleteModal, setShowDeleteModal] = useState(false); const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const handleForgotPassword = async () => { if (!user) return; await api.auth.forgotPassword({ email: user.email, lang }); setForgotSent(true); setTimeout(async () => { await logout(); router.push("/"); }, 3000); };
+  const forgotPwChecks = { length: forgotNewPw.length >= 8, uppercase: /[A-Z]/.test(forgotNewPw), lowercase: /[a-z]/.test(forgotNewPw), number: /[0-9]/.test(forgotNewPw), special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(forgotNewPw) };
+  const forgotPwValid = Object.values(forgotPwChecks).every(Boolean);
+
+  const handleForgotPassword = async () => {
+    if (!user) return;
+    await api.auth.forgotPassword({ email: user.email, lang });
+    setForgotCode(""); setForgotNewPw(""); setForgotError(""); setForgotStep("code"); setShowForgotModal(true);
+  };
+
+  const handleForgotReset = async () => {
+    if (!user || forgotCode.length !== 6 || !forgotPwValid) return;
+    setForgotError(""); setForgotLoading(true);
+    const res = await api.auth.resetPassword({ email: user.email, code: forgotCode, password: forgotNewPw });
+    setForgotLoading(false);
+    if (res.error) { setForgotError(t.forgot.codeError); return; }
+    setForgotStep("done");
+  };
 
   if (!user || !accessToken) return <main><Header /><div className={styles.container}><p className={styles.notLogged}>Not logged in</p></div><Footer /></main>;
 
@@ -74,7 +93,6 @@ export default function SettingsPage() {
         <a href="/" className={styles.backLink}>{t.settings.back}</a>
         <h1 className={styles.title}>{t.settings.title}</h1>
         {saveSuccess && <div className={styles.successMsgTop}>✓ {t.settings.saveSuccess}</div>}
-        {forgotSent && <div className={styles.successMsgTop}>✓ {t.forgot.codeSent}</div>}
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>{t.settings.accountInfo}</h2>
           <div className={styles.fieldsList}>
@@ -158,6 +176,26 @@ export default function SettingsPage() {
       {showDeleteModal && <div className={styles.overlay} onClick={() => setShowDeleteModal(false)}><div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <h3 className={styles.modalTitle}>{t.settings.deleteModalTitle}</h3><p className={styles.modalText}>{t.settings.deleteModalText}</p>
         <div className={styles.modalActions}><button className={styles.modalCancel} onClick={() => setShowDeleteModal(false)}>{t.settings.deleteModalCancel}</button><button className={styles.modalConfirm} onClick={handleDeleteConfirm} disabled={deleteLoading}>{deleteLoading ? "..." : t.settings.deleteModalConfirm}</button></div>
+      </div></div>}
+      {showForgotModal && <div className={styles.overlay} onClick={() => setShowForgotModal(false)}><div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <h3 className={styles.modalTitle}>{t.forgot.title}</h3>
+        {forgotStep === "done" ? (
+          <div>
+            <div className={styles.successMsgTop}>✓ {t.forgot.success}</div>
+            <div className={styles.modalActions}><button className={styles.modalCancel} onClick={() => setShowForgotModal(false)}>OK</button></div>
+          </div>
+        ) : (
+          <div>
+            <p className={styles.modalText}>{t.forgot.codeSent}</p>
+            {forgotError && <p className={styles.errorMsg}>{forgotError}</p>}
+            <label className={styles.confirmLabel}>{t.forgot.code}</label>
+            <input type="text" className={styles.confirmInput} style={{ textAlign: "center", letterSpacing: "8px", fontSize: "20px", fontWeight: 700 }} placeholder={t.forgot.codePlaceholder} value={forgotCode} onChange={(e) => setForgotCode(e.target.value.replace(/\D/g, "").slice(0, 6))} maxLength={6} inputMode="numeric" />
+            <label className={styles.confirmLabel} style={{ marginTop: 16 }}>{t.forgot.newPassword}</label>
+            <div className={styles.passwordWrap}><input type={showForgotNewPw ? "text" : "password"} className={styles.confirmInput} placeholder={t.forgot.newPasswordPlaceholder} value={forgotNewPw} onChange={(e) => setForgotNewPw(e.target.value)} /><button type="button" className={styles.eyeBtn} onClick={() => setShowForgotNewPw(!showForgotNewPw)}>{showForgotNewPw ? "🙈" : "👁️"}</button></div>
+            {forgotNewPw.length > 0 && <div className={styles.checks}>{Object.entries(forgotPwChecks).map(([k, v]) => <span key={k} className={v ? styles.checkOk : styles.checkFail}>{v ? "✓" : "✗"} {t.login.checks[k as keyof typeof t.login.checks]}</span>)}</div>}
+            <div className={styles.modalActions} style={{ marginTop: 16 }}><button className={styles.modalCancel} onClick={() => setShowForgotModal(false)}>{t.settings.deleteModalCancel}</button><button className={styles.modalConfirm} onClick={handleForgotReset} disabled={forgotLoading || forgotCode.length !== 6 || !forgotPwValid}>{forgotLoading ? "..." : t.forgot.resetSubmit}</button></div>
+          </div>
+        )}
       </div></div>}
     </main>
   );
