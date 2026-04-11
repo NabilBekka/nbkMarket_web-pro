@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import AuthModal from "@/components/AuthModal";
 import { useLang } from "@/context/LangContext";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/services/api";
@@ -17,6 +18,7 @@ export default function CreateShop() {
   const { login } = useAuth();
   const router = useRouter();
   const [step, setStep] = useState<"form" | "verify">("form");
+  const [showAuth, setShowAuth] = useState(false);
 
   // Form state
   const [form, setForm] = useState({
@@ -232,7 +234,7 @@ export default function CreateShop() {
 
             <p className={styles.bottomText}>
               {t.createShop.hasAccount}{" "}
-              <a href="#" className={styles.linkBtn} onClick={(e) => { e.preventDefault(); }}>{t.createShop.login}</a>
+              <a href="#" className={styles.linkBtn} onClick={(e) => { e.preventDefault(); setShowAuth(true); }}>{t.createShop.login}</a>
             </p>
           </form>
         )}
@@ -276,6 +278,7 @@ export default function CreateShop() {
       </div>
 
       <Footer />
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
     </main>
   );
 }

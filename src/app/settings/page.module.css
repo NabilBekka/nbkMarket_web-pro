@@ -391,3 +391,9 @@
     text-align: center;
   }
 }
+
+.checks { display: flex; flex-direction: column; gap: 3px; margin-top: 8px; }
+.checkOk { font-size: 11px; color: #4CAF50; font-weight: 500; }
+.checkFail { font-size: 11px; color: #E53935; font-weight: 500; }
+
+.passwordWrap .fieldInput { padding-right: 44px; }

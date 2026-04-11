@@ -23,6 +23,7 @@ export default function SettingsPage() {
   const [editing, setEditing] = useState<Record<string, boolean>>({});
   const [editValues, setEditValues] = useState<Record<string, string>>({});
   const [confirmPassword, setConfirmPassword] = useState(""); const [showConfirmPw, setShowConfirmPw] = useState(false);
+  const [showEditPw, setShowEditPw] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false); const [saveError, setSaveError] = useState(""); const [saveLoading, setSaveLoading] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
   const [deletePassword, setDeletePassword] = useState(""); const [showDeletePw, setShowDeletePw] = useState(false);
@@ -45,8 +46,14 @@ export default function SettingsPage() {
   const cancelEdit = (key: string) => { setEditing(p => ({ ...p, [key]: false })); setEditValues(p => { const c = { ...p }; delete c[key]; return c; }); };
   const hasEdits = Object.values(editing).some(Boolean);
 
+  const pwVal = editValues["new_password"] || "";
+  const pwChecks = { length: pwVal.length >= 8, uppercase: /[A-Z]/.test(pwVal), lowercase: /[a-z]/.test(pwVal), number: /[0-9]/.test(pwVal), special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwVal) };
+  const pwValid = !editing["new_password"] || Object.values(pwChecks).every(Boolean);
+
   const handleSave = async () => {
-    setSaveSuccess(false); setSaveError(""); if (!confirmPassword) { setSaveError(t.settings.saveError); return; }
+    setSaveSuccess(false); setSaveError("");
+    if (!pwValid) return;
+    if (!confirmPassword) { setSaveError(t.settings.saveError); return; }
     const updates: Record<string, string> = {}; for (const [k, ed] of Object.entries(editing)) { if (ed && editValues[k] !== undefined && editValues[k] !== "") updates[k] = editValues[k]; }
     if (!Object.keys(updates).length) return;
     setSaveLoading(true); const res = await api.auth.updateProfile(accessToken, { password: confirmPassword, updates }); setSaveLoading(false);
@@ -71,23 +78,70 @@ export default function SettingsPage() {
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>{t.settings.accountInfo}</h2>
           <div className={styles.fieldsList}>
-            {fields.map(f => (
-              <div key={f.key} className={styles.fieldRow}>
-                <div className={styles.fieldLeft}><span className={styles.fieldLabel}>{f.label}</span>
-                  {editing[f.key] ? <input type={f.type === "password" ? "password" : f.type === "email" ? "email" : "text"} className={styles.fieldInput} value={editValues[f.key] || ""} onChange={(e) => setEditValues(p => ({ ...p, [f.key]: e.target.value }))} autoFocus />
-                    : <span className={styles.fieldValue}>{f.value}</span>}
+            {fields.map(f => {
+              const pwVal = editValues[f.key] || "";
+              const pwChecks = f.type === "password" ? {
+                length: pwVal.length >= 8,
+                uppercase: /[A-Z]/.test(pwVal),
+                lowercase: /[a-z]/.test(pwVal),
+                number: /[0-9]/.test(pwVal),
+                special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwVal),
+              } : null;
+
+              return (
+                <div key={f.key} className={styles.fieldRow}>
+                  <div className={styles.fieldLeft}>
+                    <span className={styles.fieldLabel}>{f.label}</span>
+                    {editing[f.key] ? (
+                      f.type === "password" ? (
+                        <>
+                          <div className={styles.passwordWrap}>
+                            <input
+                              type={showEditPw ? "text" : "password"}
+                              className={styles.fieldInput}
+                              value={pwVal}
+                              onChange={(e) => setEditValues(p => ({ ...p, [f.key]: e.target.value }))}
+                              autoFocus
+                            />
+                            <button type="button" className={styles.eyeBtn} onClick={() => setShowEditPw(!showEditPw)}>
+                              {showEditPw ? "🙈" : "👁️"}
+                            </button>
+                          </div>
+                          {pwVal.length > 0 && pwChecks && (
+                            <div className={styles.checks}>
+                              {Object.entries(pwChecks).map(([k, v]) => (
+                                <span key={k} className={v ? styles.checkOk : styles.checkFail}>
+                                  {v ? "✓" : "✗"} {t.login.checks[k as keyof typeof t.login.checks]}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <input
+                          type={f.type === "email" ? "email" : "text"}
+                          className={styles.fieldInput}
+                          value={pwVal}
+                          onChange={(e) => setEditValues(p => ({ ...p, [f.key]: e.target.value }))}
+                          autoFocus
+                        />
+                      )
+                    ) : (
+                      <span className={styles.fieldValue}>{f.value}</span>
+                    )}
+                  </div>
+                  {f.editable !== false && (editing[f.key]
+                    ? <button className={styles.cancelBtn} onClick={() => cancelEdit(f.key)}>{t.settings.cancel}</button>
+                    : <button className={styles.editBtn} onClick={() => startEdit(f.key, f.value)}>{t.settings.edit}</button>)}
                 </div>
-                {f.editable !== false && (editing[f.key]
-                  ? <button className={styles.cancelBtn} onClick={() => cancelEdit(f.key)}>{t.settings.cancel}</button>
-                  : <button className={styles.editBtn} onClick={() => startEdit(f.key, f.value)}>{t.settings.edit}</button>)}
-              </div>
-            ))}
+              );
+            })}
           </div>
           {hasEdits && <div className={styles.saveSection}>
             <label className={styles.confirmLabel}>{t.settings.confirmPassword}</label>
             <div className={styles.passwordWrap}><input type={showConfirmPw ? "text" : "password"} className={styles.confirmInput} placeholder={t.settings.confirmPasswordPlaceholder} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} /><button type="button" className={styles.eyeBtn} onClick={() => setShowConfirmPw(!showConfirmPw)}>{showConfirmPw ? "🙈" : "👁️"}</button></div>
             <a href="#" className={styles.forgotLink} onClick={(e) => { e.preventDefault(); handleForgotPassword(); }}>{t.settings.forgotPassword}</a>
-            <button className={styles.saveBtn} onClick={handleSave} disabled={saveLoading}>{saveLoading ? "..." : t.settings.save}</button>
+            <button className={styles.saveBtn} onClick={handleSave} disabled={saveLoading || !pwValid}>{saveLoading ? "..." : t.settings.save}</button>
             {saveError && <p className={styles.errorMsg}>{saveError}</p>}
           </div>}
         </section>
