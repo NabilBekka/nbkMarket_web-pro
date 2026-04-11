@@ -397,3 +397,6 @@
 .checkFail { font-size: 11px; color: #E53935; font-weight: 500; }
 
 .passwordWrap .fieldInput { padding-right: 44px; }
+
+.fieldInputError { border-color: #E53935 !important; }
+.fieldErrorText { font-size: 11px; color: #E53935; margin-top: 4px; font-weight: 500; }

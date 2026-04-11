@@ -9,10 +9,20 @@ import { api } from "@/services/api";
 import type { User } from "@/context/AuthContext";
 import styles from "./page.module.css";
 
+const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'\-]+$/;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const pwTest = {
+  length: (v: string) => v.length >= 8,
+  uppercase: (v: string) => /[A-Z]/.test(v),
+  lowercase: (v: string) => /[a-z]/.test(v),
+  number: (v: string) => /[0-9]/.test(v),
+  special: (v: string) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(v),
+};
+
 function translateError(err: string, t: any): string {
   if (err.includes("Incorrect password")) return t.settings.saveError;
-  if (err.includes("Email already")) return t.register.emailTaken;
-  if (err.includes("ompany")) return t.register.companyError;
+  if (err.includes("Email already")) return t.createShop.emailTaken;
+  if (err.includes("ompany")) return t.createShop.companyError;
   return err;
 }
 
@@ -20,19 +30,31 @@ export default function SettingsPage() {
   const { lang, t } = useLang();
   const { user, accessToken, updateUser, logout } = useAuth();
   const router = useRouter();
+
   const [editing, setEditing] = useState<Record<string, boolean>>({});
   const [editValues, setEditValues] = useState<Record<string, string>>({});
-  const [confirmPassword, setConfirmPassword] = useState(""); const [showConfirmPw, setShowConfirmPw] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
   const [showEditPw, setShowEditPw] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false); const [saveError, setSaveError] = useState(""); const [saveLoading, setSaveLoading] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [saveLoading, setSaveLoading] = useState(false);
+
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [forgotStep, setForgotStep] = useState<"code" | "done">("code");
-  const [forgotCode, setForgotCode] = useState(""); const [forgotNewPw, setForgotNewPw] = useState(""); const [showForgotNewPw, setShowForgotNewPw] = useState(false);
-  const [forgotError, setForgotError] = useState(""); const [forgotLoading, setForgotLoading] = useState(false);
-  const [deletePassword, setDeletePassword] = useState(""); const [showDeletePw, setShowDeletePw] = useState(false);
-  const [deleteError, setDeleteError] = useState(""); const [showDeleteModal, setShowDeleteModal] = useState(false); const [deleteLoading, setDeleteLoading] = useState(false);
+  const [forgotCode, setForgotCode] = useState("");
+  const [forgotNewPw, setForgotNewPw] = useState("");
+  const [showForgotNewPw, setShowForgotNewPw] = useState(false);
+  const [forgotError, setForgotError] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
 
-  const forgotPwChecks = { length: forgotNewPw.length >= 8, uppercase: /[A-Z]/.test(forgotNewPw), lowercase: /[a-z]/.test(forgotNewPw), number: /[0-9]/.test(forgotNewPw), special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(forgotNewPw) };
+  const [deletePassword, setDeletePassword] = useState("");
+  const [showDeletePw, setShowDeletePw] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const forgotPwChecks = Object.fromEntries(Object.entries(pwTest).map(([k, fn]) => [k, fn(forgotNewPw)]));
   const forgotPwValid = Object.values(forgotPwChecks).every(Boolean);
 
   const handleForgotPassword = async () => {
@@ -65,30 +87,47 @@ export default function SettingsPage() {
   const cancelEdit = (key: string) => { setEditing(p => ({ ...p, [key]: false })); setEditValues(p => { const c = { ...p }; delete c[key]; return c; }); };
   const hasEdits = Object.values(editing).some(Boolean);
 
+  function isFieldValid(key: string): boolean {
+    if (!editing[key]) return true;
+    const val = editValues[key] || "";
+    if (val === "") return false;
+    if (key === "first_name" || key === "last_name") return nameRegex.test(val);
+    if (key === "company_name") return val.length >= 2;
+    if (key === "email") return emailRegex.test(val);
+    if (key === "new_password") return Object.values(pwTest).every(fn => fn(val));
+    return true;
+  }
+
+  const allFieldsValid = Object.keys(editing).filter(k => editing[k]).every(k => isFieldValid(k));
   const pwVal = editValues["new_password"] || "";
-  const pwChecks = { length: pwVal.length >= 8, uppercase: /[A-Z]/.test(pwVal), lowercase: /[a-z]/.test(pwVal), number: /[0-9]/.test(pwVal), special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwVal) };
-  const pwValid = !editing["new_password"] || Object.values(pwChecks).every(Boolean);
+  const pwChecks = Object.fromEntries(Object.entries(pwTest).map(([k, fn]) => [k, fn(pwVal)]));
 
   const handleSave = async () => {
     setSaveSuccess(false); setSaveError("");
-    if (!pwValid) return;
+    if (!allFieldsValid) return;
     if (!confirmPassword) { setSaveError(t.settings.saveError); return; }
-    const updates: Record<string, string> = {}; for (const [k, ed] of Object.entries(editing)) { if (ed && editValues[k] !== undefined && editValues[k] !== "") updates[k] = editValues[k]; }
+    const updates: Record<string, string> = {};
+    for (const [k, ed] of Object.entries(editing)) { if (ed && editValues[k] !== undefined && editValues[k] !== "") updates[k] = editValues[k]; }
     if (!Object.keys(updates).length) return;
-    setSaveLoading(true); const res = await api.auth.updateProfile(accessToken, { password: confirmPassword, updates }); setSaveLoading(false);
+    setSaveLoading(true);
+    const res = await api.auth.updateProfile(accessToken, { password: confirmPassword, updates });
+    setSaveLoading(false);
     if (res.error) { setSaveError(translateError(res.error, t)); return; }
     if (res.data?.user) updateUser(res.data.user as User);
     setSaveSuccess(true); setEditing({}); setEditValues({}); setConfirmPassword("");
   };
 
   const handleDeleteConfirm = async () => {
-    setDeleteLoading(true); const res = await api.auth.deleteAccount(accessToken, { password: deletePassword }); setDeleteLoading(false);
+    setDeleteLoading(true);
+    const res = await api.auth.deleteAccount(accessToken, { password: deletePassword });
+    setDeleteLoading(false);
     if (res.error) { setShowDeleteModal(false); setDeleteError(translateError(res.error, t)); return; }
     setShowDeleteModal(false); await logout(); router.push("/");
   };
 
   return (
-    <main><Header />
+    <main>
+      <Header />
       <div className={styles.container}>
         <a href="/" className={styles.backLink}>{t.settings.back}</a>
         <h1 className={styles.title}>{t.settings.title}</h1>
@@ -97,15 +136,9 @@ export default function SettingsPage() {
           <h2 className={styles.sectionTitle}>{t.settings.accountInfo}</h2>
           <div className={styles.fieldsList}>
             {fields.map(f => {
-              const pwVal = editValues[f.key] || "";
-              const pwChecks = f.type === "password" ? {
-                length: pwVal.length >= 8,
-                uppercase: /[A-Z]/.test(pwVal),
-                lowercase: /[a-z]/.test(pwVal),
-                number: /[0-9]/.test(pwVal),
-                special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwVal),
-              } : null;
-
+              const val = editValues[f.key] || "";
+              const valid = isFieldValid(f.key);
+              const showErr = editing[f.key] && val.length > 0 && !valid;
               return (
                 <div key={f.key} className={styles.fieldRow}>
                   <div className={styles.fieldLeft}>
@@ -114,39 +147,18 @@ export default function SettingsPage() {
                       f.type === "password" ? (
                         <>
                           <div className={styles.passwordWrap}>
-                            <input
-                              type={showEditPw ? "text" : "password"}
-                              className={styles.fieldInput}
-                              value={pwVal}
-                              onChange={(e) => setEditValues(p => ({ ...p, [f.key]: e.target.value }))}
-                              autoFocus
-                            />
-                            <button type="button" className={styles.eyeBtn} onClick={() => setShowEditPw(!showEditPw)}>
-                              {showEditPw ? "🙈" : "👁️"}
-                            </button>
+                            <input type={showEditPw ? "text" : "password"} className={`${styles.fieldInput} ${showErr ? styles.fieldInputError : ""}`} value={val} onChange={(e) => setEditValues(p => ({ ...p, [f.key]: e.target.value }))} autoFocus />
+                            <button type="button" className={styles.eyeBtn} onClick={() => setShowEditPw(!showEditPw)}>{showEditPw ? "🙈" : "👁️"}</button>
                           </div>
-                          {pwVal.length > 0 && pwChecks && (
-                            <div className={styles.checks}>
-                              {Object.entries(pwChecks).map(([k, v]) => (
-                                <span key={k} className={v ? styles.checkOk : styles.checkFail}>
-                                  {v ? "✓" : "✗"} {t.login.checks[k as keyof typeof t.login.checks]}
-                                </span>
-                              ))}
-                            </div>
-                          )}
+                          {val.length > 0 && <div className={styles.checks}>{Object.entries(pwChecks).map(([k, v]) => <span key={k} className={v ? styles.checkOk : styles.checkFail}>{v ? "✓" : "✗"} {t.login.checks[k as keyof typeof t.login.checks]}</span>)}</div>}
                         </>
                       ) : (
-                        <input
-                          type={f.type === "email" ? "email" : "text"}
-                          className={styles.fieldInput}
-                          value={pwVal}
-                          onChange={(e) => setEditValues(p => ({ ...p, [f.key]: e.target.value }))}
-                          autoFocus
-                        />
+                        <>
+                          <input type={f.type === "email" ? "email" : "text"} className={`${styles.fieldInput} ${showErr ? styles.fieldInputError : ""}`} value={val} onChange={(e) => setEditValues(p => ({ ...p, [f.key]: e.target.value }))} autoFocus />
+                          {showErr && <p className={styles.fieldErrorText}>{(f.key === "first_name" || f.key === "last_name") ? t.createShop.nameError : f.type === "email" ? t.createShop.emailError : ""}</p>}
+                        </>
                       )
-                    ) : (
-                      <span className={styles.fieldValue}>{f.value}</span>
-                    )}
+                    ) : <span className={styles.fieldValue}>{f.value}</span>}
                   </div>
                   {f.editable !== false && (editing[f.key]
                     ? <button className={styles.cancelBtn} onClick={() => cancelEdit(f.key)}>{t.settings.cancel}</button>
@@ -159,12 +171,13 @@ export default function SettingsPage() {
             <label className={styles.confirmLabel}>{t.settings.confirmPassword}</label>
             <div className={styles.passwordWrap}><input type={showConfirmPw ? "text" : "password"} className={styles.confirmInput} placeholder={t.settings.confirmPasswordPlaceholder} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} /><button type="button" className={styles.eyeBtn} onClick={() => setShowConfirmPw(!showConfirmPw)}>{showConfirmPw ? "🙈" : "👁️"}</button></div>
             <a href="#" className={styles.forgotLink} onClick={(e) => { e.preventDefault(); handleForgotPassword(); }}>{t.settings.forgotPassword}</a>
-            <button className={styles.saveBtn} onClick={handleSave} disabled={saveLoading || !pwValid}>{saveLoading ? "..." : t.settings.save}</button>
+            <button className={styles.saveBtn} onClick={handleSave} disabled={saveLoading || !allFieldsValid}>{saveLoading ? "..." : t.settings.save}</button>
             {saveError && <p className={styles.errorMsg}>{saveError}</p>}
           </div>}
         </section>
         <section className={styles.dangerSection}>
-          <h2 className={styles.dangerTitle}>{t.settings.deleteAccount}</h2><p className={styles.dangerText}>{t.settings.deleteWarning}</p>
+          <h2 className={styles.dangerTitle}>{t.settings.deleteAccount}</h2>
+          <p className={styles.dangerText}>{t.settings.deleteWarning}</p>
           <label className={styles.confirmLabel}>{t.settings.deletePassword}</label>
           <div className={styles.passwordWrap}><input type={showDeletePw ? "text" : "password"} className={styles.confirmInput} placeholder={t.settings.deletePasswordPlaceholder} value={deletePassword} onChange={(e) => setDeletePassword(e.target.value)} /><button type="button" className={styles.eyeBtn} onClick={() => setShowDeletePw(!showDeletePw)}>{showDeletePw ? "🙈" : "👁️"}</button></div>
           <a href="#" className={styles.forgotLink} onClick={(e) => { e.preventDefault(); handleForgotPassword(); }}>{t.settings.forgotPassword}</a>
@@ -179,23 +192,16 @@ export default function SettingsPage() {
       </div></div>}
       {showForgotModal && <div className={styles.overlay} onClick={() => setShowForgotModal(false)}><div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <h3 className={styles.modalTitle}>{t.forgot.title}</h3>
-        {forgotStep === "done" ? (
-          <div>
-            <div className={styles.successMsgTop}>✓ {t.forgot.success}</div>
-            <div className={styles.modalActions}><button className={styles.modalCancel} onClick={() => setShowForgotModal(false)}>OK</button></div>
-          </div>
-        ) : (
-          <div>
-            <p className={styles.modalText}>{t.forgot.codeSent}</p>
-            {forgotError && <p className={styles.errorMsg}>{forgotError}</p>}
-            <label className={styles.confirmLabel}>{t.forgot.code}</label>
-            <input type="text" className={styles.confirmInput} style={{ textAlign: "center", letterSpacing: "8px", fontSize: "20px", fontWeight: 700 }} placeholder={t.forgot.codePlaceholder} value={forgotCode} onChange={(e) => setForgotCode(e.target.value.replace(/\D/g, "").slice(0, 6))} maxLength={6} inputMode="numeric" />
-            <label className={styles.confirmLabel} style={{ marginTop: 16 }}>{t.forgot.newPassword}</label>
-            <div className={styles.passwordWrap}><input type={showForgotNewPw ? "text" : "password"} className={styles.confirmInput} placeholder={t.forgot.newPasswordPlaceholder} value={forgotNewPw} onChange={(e) => setForgotNewPw(e.target.value)} /><button type="button" className={styles.eyeBtn} onClick={() => setShowForgotNewPw(!showForgotNewPw)}>{showForgotNewPw ? "🙈" : "👁️"}</button></div>
-            {forgotNewPw.length > 0 && <div className={styles.checks}>{Object.entries(forgotPwChecks).map(([k, v]) => <span key={k} className={v ? styles.checkOk : styles.checkFail}>{v ? "✓" : "✗"} {t.login.checks[k as keyof typeof t.login.checks]}</span>)}</div>}
-            <div className={styles.modalActions} style={{ marginTop: 16 }}><button className={styles.modalCancel} onClick={() => setShowForgotModal(false)}>{t.settings.deleteModalCancel}</button><button className={styles.modalConfirm} onClick={handleForgotReset} disabled={forgotLoading || forgotCode.length !== 6 || !forgotPwValid}>{forgotLoading ? "..." : t.forgot.resetSubmit}</button></div>
-          </div>
-        )}
+        {forgotStep === "done" ? <div><div className={styles.successMsgTop}>✓ {t.forgot.success}</div><div className={styles.modalActions}><button className={styles.modalCancel} onClick={() => setShowForgotModal(false)}>OK</button></div></div> : <div>
+          <p className={styles.modalText}>{t.forgot.codeSent}</p>
+          {forgotError && <p className={styles.errorMsg}>{forgotError}</p>}
+          <label className={styles.confirmLabel}>{t.forgot.code}</label>
+          <input type="text" className={styles.confirmInput} style={{ textAlign: "center", letterSpacing: "8px", fontSize: "20px", fontWeight: 700 }} placeholder={t.forgot.codePlaceholder} value={forgotCode} onChange={(e) => setForgotCode(e.target.value.replace(/\D/g, "").slice(0, 6))} maxLength={6} inputMode="numeric" />
+          <label className={styles.confirmLabel} style={{ marginTop: 16 }}>{t.forgot.newPassword}</label>
+          <div className={styles.passwordWrap}><input type={showForgotNewPw ? "text" : "password"} className={styles.confirmInput} placeholder={t.forgot.newPasswordPlaceholder} value={forgotNewPw} onChange={(e) => setForgotNewPw(e.target.value)} /><button type="button" className={styles.eyeBtn} onClick={() => setShowForgotNewPw(!showForgotNewPw)}>{showForgotNewPw ? "🙈" : "👁️"}</button></div>
+          {forgotNewPw.length > 0 && <div className={styles.checks}>{Object.entries(forgotPwChecks).map(([k, v]) => <span key={k} className={v ? styles.checkOk : styles.checkFail}>{v ? "✓" : "✗"} {t.login.checks[k as keyof typeof t.login.checks]}</span>)}</div>}
+          <div className={styles.modalActions} style={{ marginTop: 16 }}><button className={styles.modalCancel} onClick={() => setShowForgotModal(false)}>{t.settings.deleteModalCancel}</button><button className={styles.modalConfirm} onClick={handleForgotReset} disabled={forgotLoading || forgotCode.length !== 6 || !forgotPwValid}>{forgotLoading ? "..." : t.forgot.resetSubmit}</button></div>
+        </div>}
       </div></div>}
     </main>
   );
