@@ -1,0 +1,67 @@
+.container { max-width: 640px; padding: 32px; }
+.title { font-size: 24px; font-weight: 700; color: var(--text-dark); margin-bottom: 24px; }
+
+.section { background: var(--white); border-radius: 12px; padding: 20px; border: 1px solid var(--card-border); margin-bottom: 20px; }
+.sectionTitle { font-size: 16px; font-weight: 600; color: var(--text-dark); margin-bottom: 16px; }
+
+.langRow { display: flex; gap: 8px; }
+.langBtn { flex: 1; padding: 10px; border: 1px solid var(--card-border); border-radius: 8px; background: var(--white); font-size: 13px; cursor: pointer; text-align: center; color: var(--text-gray); transition: all 0.2s; }
+.langBtn:hover { border-color: #ccc; }
+.langActive { background: var(--bg-gray); border-color: var(--accent); color: var(--text-dark); font-weight: 600; }
+
+.successMsg { background: #E8F5E9; color: #2E7D32; padding: 12px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 16px; }
+
+.fieldsList { display: flex; flex-direction: column; }
+.fieldRow { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f3f3f3; }
+.fieldRow:last-child { border-bottom: none; }
+.fieldLeft { flex: 1; min-width: 0; }
+.fieldLabel { display: block; font-size: 11px; font-weight: 600; color: var(--text-gray); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.fieldValue { font-size: 14px; color: var(--text-dark); }
+.fieldInput { width: 100%; max-width: 280px; padding: 8px 12px; border: 1px solid var(--accent); border-radius: 8px; font-size: 14px; color: var(--text-dark); background: #F8FCF5; outline: none; }
+.fieldInputError { border-color: #E53935 !important; }
+.fieldErrorText { font-size: 11px; color: #E53935; margin-top: 4px; font-weight: 500; }
+.editBtn { font-size: 12px; font-weight: 500; color: var(--accent); background: none; border: none; cursor: pointer; padding: 4px 8px; }
+.editBtn:hover { text-decoration: underline; }
+.cancelBtn { font-size: 12px; font-weight: 500; color: var(--text-gray); background: none; border: none; cursor: pointer; padding: 4px 8px; }
+.cancelBtn:hover { text-decoration: underline; }
+
+.passwordWrap { position: relative; max-width: 280px; }
+.passwordWrap input { padding-right: 44px; }
+.eyeBtn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 16px; padding: 4px; line-height: 1; }
+
+.checks { display: flex; flex-direction: column; gap: 3px; margin-top: 8px; }
+.checkOk { font-size: 11px; color: #4CAF50; font-weight: 500; }
+.checkFail { font-size: 11px; color: #E53935; font-weight: 500; }
+
+.saveSection { margin-top: 16px; padding-top: 16px; border-top: 1px solid #f3f3f3; }
+.confirmLabel { display: block; font-size: 13px; font-weight: 600; color: var(--text-dark); margin-bottom: 6px; }
+.confirmInput { width: 100%; max-width: 280px; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; color: var(--text-dark); outline: none; background: var(--white); }
+.confirmInput:focus { border-color: var(--accent); }
+.forgotLink { display: inline-block; font-size: 12px; color: var(--accent); margin-top: 4px; text-decoration: none; }
+.forgotLink:hover { text-decoration: underline; }
+.saveBtn { display: block; margin-top: 14px; padding: 10px 28px; background: var(--green-dark); color: var(--white); border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.saveBtn:hover { opacity: 0.9; }
+.saveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.errorMsg { font-size: 13px; color: #E53935; margin-top: 8px; font-weight: 500; }
+
+.dangerSection { background: var(--white); border-radius: 12px; padding: 20px; border: 1px solid #FFCDD2; margin-bottom: 20px; }
+.dangerTitle { font-size: 16px; font-weight: 600; color: #E53935; margin-bottom: 6px; }
+.dangerText { font-size: 13px; color: var(--text-gray); margin-bottom: 14px; line-height: 1.5; }
+.deleteBtn { display: block; margin-top: 14px; padding: 10px 28px; background: #E53935; color: var(--white); border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.deleteBtn:hover { opacity: 0.9; }
+
+.logoutBtn { width: 100%; padding: 12px; background: none; border: 1px solid #FFCDD2; border-radius: 8px; font-size: 14px; font-weight: 500; color: #E53935; cursor: pointer; transition: background 0.15s; }
+.logoutBtn:hover { background: #FFF0F0; }
+
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+.modal { background: var(--white); border-radius: 16px; padding: 28px; width: 100%; max-width: 420px; }
+.modalTitle { font-size: 20px; font-weight: 700; color: #E53935; margin-bottom: 12px; }
+.modalText { font-size: 14px; color: var(--text-gray); line-height: 1.6; margin-bottom: 20px; }
+.modalActions { display: flex; gap: 10px; }
+.modalCancel { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: var(--white); font-size: 13px; font-weight: 500; cursor: pointer; }
+.modalCancel:hover { background: var(--bg-gray); }
+.modalConfirm { flex: 1; padding: 10px; background: #E53935; color: var(--white); border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.modalConfirm:hover { opacity: 0.9; }
+.modalConfirm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+@media (max-width: 600px) { .container { padding: 16px; } .fieldInput, .confirmInput, .passwordWrap { max-width: 100%; } }

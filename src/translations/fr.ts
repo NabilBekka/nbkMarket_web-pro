@@ -4,6 +4,20 @@ export const fr = {
     logout: "Déconnexion",
     settings: "Paramètres du compte",
   },
+  sidebar: {
+    dashboard: "Tableau de bord",
+    products: "Produits",
+    messages: "Messages",
+    contacts: "Contacts",
+    sponsoring: "Sponsoring",
+    analytics: "Statistiques",
+    myShop: "Ma boutique",
+    settings: "Paramètres",
+  },
+  dashboard: {
+    welcome: "Bienvenue",
+    placeholder: "Cette section arrive bientôt.",
+  },
   landing: {
     badge: "La plateforme des commerçants algériens",
     title: "Votre boutique en ligne,",

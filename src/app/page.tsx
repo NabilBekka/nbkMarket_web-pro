@@ -2,11 +2,18 @@
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Dashboard from "@/components/Dashboard";
 import { useLang } from "@/context/LangContext";
+import { useAuth } from "@/context/AuthContext";
 import styles from "./page.module.css";
 
 export default function Home() {
   const { t } = useLang();
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) return null;
+
+  if (user) return <Dashboard />;
 
   return (
     <main>

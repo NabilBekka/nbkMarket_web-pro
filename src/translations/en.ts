@@ -4,6 +4,20 @@ export const en = {
     logout: "Logout",
     settings: "Account settings",
   },
+  sidebar: {
+    dashboard: "Dashboard",
+    products: "Products",
+    messages: "Messages",
+    contacts: "Contacts",
+    sponsoring: "Sponsoring",
+    analytics: "Analytics",
+    myShop: "My shop",
+    settings: "Settings",
+  },
+  dashboard: {
+    welcome: "Welcome",
+    placeholder: "This section is coming soon.",
+  },
   landing: {
     badge: "The platform for Algerian merchants",
     title: "Your online shop,",
