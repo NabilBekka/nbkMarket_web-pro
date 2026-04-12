@@ -1,0 +1,54 @@
+.container { padding: 28px 32px; }
+
+.topBar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+.greeting { font-size: 26px; font-weight: 700; color: var(--text-dark); }
+.companyName { font-size: 14px; color: var(--text-gray); margin-top: 4px; }
+.addBtn { padding: 11px 22px; background: var(--green-dark); color: var(--white); border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: opacity 0.2s; }
+.addBtn:hover { opacity: 0.9; }
+
+.statsGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+.statCard { background: var(--white); border-radius: 12px; padding: 20px; border: 1px solid var(--card-border); display: flex; flex-direction: column; gap: 4px; }
+.statLabel { font-size: 11px; font-weight: 600; color: var(--text-gray); text-transform: uppercase; letter-spacing: 0.5px; }
+.statValue { font-size: 32px; font-weight: 800; color: var(--text-dark); line-height: 1.1; }
+.statTrend { font-size: 12px; color: #2E7D32; font-weight: 500; }
+.statWarn { font-size: 12px; color: #E65100; font-weight: 500; }
+.statSub { font-size: 12px; color: var(--text-gray); }
+.star { font-size: 24px; margin-right: 4px; vertical-align: middle; }
+
+.bottomRow { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.card { background: var(--white); border-radius: 12px; padding: 20px; border: 1px solid var(--card-border); }
+.cardHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.cardTitle { font-size: 16px; font-weight: 600; color: var(--text-dark); }
+.cardLink { background: none; border: none; color: var(--accent); font-size: 13px; font-weight: 500; cursor: pointer; padding: 0; }
+.cardLink:hover { text-decoration: underline; }
+
+.contactsList { display: flex; flex-direction: column; }
+.contactRow { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f5f5f5; }
+.contactRow:last-child { border-bottom: none; }
+.contactName { display: block; font-size: 14px; font-weight: 600; color: var(--text-dark); }
+.contactMeta { display: block; font-size: 12px; color: var(--text-gray); margin-top: 2px; }
+.badge { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+.badgeNew { background: #E8F5E9; color: #2E7D32; }
+.badgePending { background: #FFF3E0; color: #E65100; }
+.badgeDone { background: #E3F2FD; color: #1565C0; }
+
+.productsList { display: flex; flex-direction: column; }
+.productRow { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+.productRow:last-child { border-bottom: none; }
+.productThumb { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.productInfo { flex: 1; min-width: 0; }
+.productName { display: block; font-size: 14px; font-weight: 600; color: var(--text-dark); }
+.productViews { display: block; font-size: 12px; color: var(--text-gray); margin-top: 1px; }
+.productPrice { font-size: 14px; font-weight: 700; color: var(--text-dark); white-space: nowrap; }
+
+@media (max-width: 1024px) {
+  .statsGrid { grid-template-columns: repeat(2, 1fr); }
+  .bottomRow { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .container { padding: 16px; }
+  .topBar { flex-direction: column; gap: 12px; }
+  .addBtn { width: 100%; text-align: center; }
+  .statsGrid { grid-template-columns: 1fr; }
+  .statValue { font-size: 24px; }
+}
