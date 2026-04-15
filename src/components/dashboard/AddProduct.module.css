@@ -1,0 +1,51 @@
+.container { max-width: 640px; padding: 28px 32px; }
+
+.backBtn { background: none; border: none; color: var(--accent); font-size: 13px; font-weight: 500; cursor: pointer; padding: 0; margin-bottom: 8px; }
+.backBtn:hover { text-decoration: underline; }
+
+.title { font-size: 24px; font-weight: 700; color: var(--text-dark); margin-bottom: 24px; }
+
+.form { display: flex; flex-direction: column; }
+
+.field { margin-bottom: 18px; flex: 1; }
+
+.label { display: block; font-size: 13px; font-weight: 600; color: var(--text-dark); margin-bottom: 6px; }
+
+.input {
+  width: 100%; padding: 11px 14px; border: 1px solid #ddd; border-radius: 8px;
+  font-size: 14px; color: var(--text-dark); outline: none; background: var(--white); transition: border-color 0.2s;
+}
+.input:focus { border-color: var(--accent); }
+.input::placeholder { color: #bbb; }
+.inputError { border-color: #E53935; }
+
+.textarea {
+  width: 100%; padding: 11px 14px; border: 1px solid #ddd; border-radius: 8px;
+  font-size: 14px; color: var(--text-dark); outline: none; background: var(--white); transition: border-color 0.2s;
+  resize: vertical; font-family: inherit; min-height: 100px;
+}
+.textarea:focus { border-color: var(--accent); }
+.textarea::placeholder { color: #bbb; }
+
+.errorText { font-size: 11px; color: #E53935; margin-top: 4px; font-weight: 500; }
+
+.errorBox { background: #FFF0F0; color: #E53935; font-size: 13px; font-weight: 500; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #FFCDD2; text-align: center; }
+
+.successBox { background: #E8F5E9; color: #2E7D32; font-size: 15px; font-weight: 600; padding: 20px; border-radius: 10px; text-align: center; }
+
+.row { display: flex; gap: 16px; }
+
+.preview { margin-top: 8px; }
+.previewImg { max-width: 100%; max-height: 140px; border-radius: 8px; border: 1px solid #eee; display: none; }
+
+.submitBtn {
+  width: 100%; padding: 13px; background: var(--green-dark); color: var(--white); border: none;
+  border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; margin-top: 4px;
+}
+.submitBtn:hover { opacity: 0.9; }
+.submitBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+@media (max-width: 600px) {
+  .container { padding: 16px; }
+  .row { flex-direction: column; gap: 0; }
+}

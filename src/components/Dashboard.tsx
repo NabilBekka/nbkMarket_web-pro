@@ -3,6 +3,7 @@ import { useState } from "react";
 import Sidebar, { SidebarPage } from "./Sidebar";
 import DashboardHome from "./dashboard/DashboardHome";
 import DashboardSettings from "./dashboard/DashboardSettings";
+import AddProduct from "./dashboard/AddProduct";
 import styles from "./Dashboard.module.css";
 import { useLang } from "@/context/LangContext";
 
@@ -32,11 +33,7 @@ export default function Dashboard() {
           <DashboardSettings />
         )}
         {page === "addProduct" && (
-          <div className={styles.placeholder}>
-            <span className={styles.placeholderIcon}>📦</span>
-            <h1 className={styles.placeholderTitle}>{t.dashboard.addProduct}</h1>
-            <p className={styles.placeholderText}>{t.dashboard.placeholder}</p>
-          </div>
+          <AddProduct onBack={() => setPage("dashboard")} onSuccess={() => setPage("products")} />
         )}
         {page !== "dashboard" && page !== "settings" && page !== "addProduct" && (
           <div className={styles.placeholder}>

@@ -1,7 +1,11 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/merchant";
+const BASE_URL = API_URL.replace(/\/merchant$/, "");
 interface ApiResponse<T = unknown> { data?: T; error?: string; }
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
   try { const { headers: h, ...rest } = options; const res = await fetch(`${API_URL}${endpoint}`, { headers: { "Content-Type": "application/json", ...(h as Record<string, string>) }, credentials: "include", ...rest }); const data = await res.json(); if (!res.ok) return { error: data.error || "Request failed" }; return { data }; } catch { return { error: "Network error" }; }
+}
+async function requestBase<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
+  try { const { headers: h, ...rest } = options; const res = await fetch(`${BASE_URL}${endpoint}`, { headers: { "Content-Type": "application/json", ...(h as Record<string, string>) }, credentials: "include", ...rest }); const data = await res.json(); if (!res.ok) return { error: data.error || "Request failed" }; return { data }; } catch { return { error: "Network error" }; }
 }
 function authH(token: string) { return { Authorization: `Bearer ${token}` }; }
 export const api = { auth: {
@@ -18,4 +22,10 @@ export const api = { auth: {
   updateProfile: (t: string, b: { password: string; updates: Record<string, string> }) => request<{ user: Record<string, unknown> }>("/auth/profile", { method: "PUT", headers: authH(t), body: JSON.stringify(b) }),
   deleteAccount: (t: string, b: { password: string }) => request("/auth/account", { method: "DELETE", headers: authH(t), body: JSON.stringify(b) }),
   updateLang: (t: string, b: { lang: string }) => request("/auth/lang", { method: "PUT", headers: authH(t), body: JSON.stringify(b) }),
+},
+products: {
+  create: (t: string, b: { title: string; description: string; price: number; main_image: string; image_2?: string; image_3?: string }) =>
+    requestBase<{ product: Record<string, unknown> }>("/products", { method: "POST", headers: authH(t), body: JSON.stringify(b) }),
+  getMyProducts: (t: string) =>
+    requestBase<{ products: Record<string, unknown>[] }>("/products/my/list", { headers: authH(t) }),
 }};
