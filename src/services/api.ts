@@ -28,4 +28,16 @@ products: {
     requestBase<{ product: Record<string, unknown> }>("/products", { method: "POST", headers: authH(t), body: JSON.stringify(b) }),
   getMyProducts: (t: string) =>
     requestBase<{ products: Record<string, unknown>[] }>("/products/my/list", { headers: authH(t) }),
+},
+upload: {
+  image: async (token: string, file: File): Promise<ApiResponse<{ path: string }>> => {
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      const res = await fetch(`${BASE_URL}/upload`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: formData, credentials: "include" });
+      const data = await res.json();
+      if (!res.ok) return { error: data.error || "Upload failed" };
+      return { data };
+    } catch { return { error: "Network error" }; }
+  },
 }};
