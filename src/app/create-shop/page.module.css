@@ -44,6 +44,7 @@
 .field {
   margin-bottom: 16px;
   flex: 1;
+  position: relative;
 }
 
 .label {
@@ -182,3 +183,67 @@
 }
 
 .checkText { font-size: 11px; color: var(--text-gray); margin-top: 4px; }
+
+/* Category autocomplete dropdown */
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--white);
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  z-index: 50;
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.dropdownItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 11px 14px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s;
+  gap: 8px;
+}
+
+.dropdownItem:hover {
+  background: var(--bg-gray);
+}
+
+.dropdownName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.dropdownParent {
+  font-size: 11px;
+  color: var(--text-gray);
+  white-space: nowrap;
+}
+
+.dropdownMore {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-top: 1px solid #f0f0f0;
+  background: none;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.12s;
+}
+
+.dropdownMore:hover {
+  background: var(--bg-gray);
+}
