@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Sidebar, { SidebarPage } from "./Sidebar";
 import DashboardHome from "./dashboard/DashboardHome";
+import DashboardProducts from "./dashboard/DashboardProducts";
 import DashboardSettings from "./dashboard/DashboardSettings";
 import AddProduct from "./dashboard/AddProduct";
 import styles from "./Dashboard.module.css";
@@ -10,7 +11,7 @@ import { useLang } from "@/context/LangContext";
 type Page = SidebarPage | "addProduct";
 
 const placeholderIcons: Record<string, string> = {
-  products: "📦", messages: "💬", contacts: "📇",
+  messages: "💬", contacts: "📇",
   sponsoring: "⭐", analytics: "📈", myShop: "🏪",
 };
 
@@ -29,13 +30,16 @@ export default function Dashboard() {
         {page === "dashboard" && (
           <DashboardHome onAddProduct={() => setPage("addProduct")} />
         )}
+        {page === "products" && (
+          <DashboardProducts onAddProduct={() => setPage("addProduct")} onEditProduct={(id) => { /* TODO: edit page */ }} />
+        )}
         {page === "settings" && (
           <DashboardSettings />
         )}
         {page === "addProduct" && (
           <AddProduct onBack={() => setPage("dashboard")} onSuccess={() => setPage("products")} />
         )}
-        {page !== "dashboard" && page !== "settings" && page !== "addProduct" && (
+        {page !== "dashboard" && page !== "products" && page !== "settings" && page !== "addProduct" && (
           <div className={styles.placeholder}>
             <span className={styles.placeholderIcon}>{placeholderIcons[page] || "📋"}</span>
             <h1 className={styles.placeholderTitle}>{t.sidebar[page as keyof typeof t.sidebar]}</h1>
