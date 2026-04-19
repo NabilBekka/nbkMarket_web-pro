@@ -1,0 +1,68 @@
+.container { padding: 28px 32px; max-width: 900px; }
+.loading { text-align: center; padding: 60px; font-size: 16px; color: #ccc; }
+
+.backBtn { background: none; border: none; color: var(--accent); font-size: 13px; font-weight: 500; cursor: pointer; padding: 0; margin-bottom: 12px; }
+.backBtn:hover { text-decoration: underline; }
+
+.actions { display: flex; gap: 10px; margin-bottom: 24px; }
+.editBtn { padding: 9px 18px; background: var(--green-dark); color: var(--white); border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.editBtn:hover { opacity: 0.9; }
+.deleteBtn { padding: 9px 18px; background: #E53935; color: var(--white); border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.deleteBtn:hover { opacity: 0.9; }
+
+.content { display: flex; gap: 32px; margin-bottom: 32px; }
+
+/* Images */
+.imagesSection { flex-shrink: 0; width: 320px; }
+.mainImage { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; background: #f5f5f5; display: block; }
+.thumbnails { display: flex; gap: 8px; margin-top: 10px; }
+.thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid transparent; opacity: 0.6; transition: all 0.15s; }
+.thumb:hover { opacity: 0.9; }
+.thumbActive { border-color: var(--accent); opacity: 1; }
+
+/* Info */
+.infoSection { flex: 1; min-width: 0; }
+.title { font-size: 24px; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
+.price { font-size: 22px; font-weight: 800; color: var(--green-dark); margin-bottom: 12px; }
+
+.ratingRow { display: flex; align-items: center; gap: 6px; margin-bottom: 16px; }
+.ratingStars { font-size: 18px; color: #FFC107; }
+.ratingValue { font-size: 16px; font-weight: 700; color: var(--text-dark); }
+.ratingCount { font-size: 13px; color: var(--text-gray); }
+.noRating { font-size: 13px; color: #bbb; font-style: italic; margin-bottom: 16px; }
+
+.descSection { margin-bottom: 16px; }
+.descLabel { font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 6px; }
+.descText { font-size: 14px; color: var(--text-gray); line-height: 1.6; white-space: pre-wrap; }
+
+.dateText { font-size: 12px; color: #bbb; }
+
+/* Reviews */
+.reviewsSection { border-top: 1px solid var(--card-border); padding-top: 24px; }
+.reviewsTitle { font-size: 18px; font-weight: 600; color: var(--text-dark); margin-bottom: 16px; }
+.noReviews { font-size: 13px; color: #bbb; font-style: italic; }
+.reviewsList { display: flex; flex-direction: column; gap: 12px; }
+.reviewCard { background: var(--white); border: 1px solid var(--card-border); border-radius: 10px; padding: 14px 16px; }
+.reviewHeader { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+.reviewUser { font-size: 13px; font-weight: 600; color: var(--text-dark); }
+.reviewStars { font-size: 14px; color: #FFC107; }
+.reviewDate { font-size: 11px; color: #bbb; margin-left: auto; }
+.reviewComment { font-size: 13px; color: var(--text-gray); line-height: 1.5; }
+
+/* Modal */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+.modal { background: var(--white); border-radius: 16px; padding: 28px; width: 100%; max-width: 400px; }
+.modalTitle { font-size: 18px; font-weight: 700; color: #E53935; margin-bottom: 10px; }
+.modalText { font-size: 14px; color: var(--text-gray); line-height: 1.6; margin-bottom: 20px; }
+.modalActions { display: flex; gap: 10px; }
+.modalCancel { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: var(--white); font-size: 13px; font-weight: 500; cursor: pointer; }
+.modalCancel:hover { background: var(--bg-gray); }
+.modalConfirm { flex: 1; padding: 10px; background: #E53935; color: var(--white); border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.modalConfirm:hover { opacity: 0.9; }
+.modalConfirm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+@media (max-width: 768px) {
+  .container { padding: 16px; }
+  .content { flex-direction: column; gap: 20px; }
+  .imagesSection { width: 100%; }
+}

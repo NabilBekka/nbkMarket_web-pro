@@ -28,6 +28,14 @@ products: {
     requestBase<{ product: Record<string, unknown> }>("/products", { method: "POST", headers: authH(t), body: JSON.stringify(b) }),
   getMyProducts: (t: string) =>
     requestBase<{ products: Record<string, unknown>[] }>("/products/my/list", { headers: authH(t) }),
+  getById: (id: string) =>
+    requestBase<{ product: Record<string, unknown> }>(`/products/${id}`),
+  update: (t: string, id: string, b: Record<string, unknown>) =>
+    requestBase<{ product: Record<string, unknown> }>(`/products/${id}`, { method: "PUT", headers: authH(t), body: JSON.stringify(b) }),
+  remove: (t: string, id: string) =>
+    requestBase(`/products/${id}`, { method: "DELETE", headers: authH(t) }),
+  getReviews: (productId: string) =>
+    requestBase<{ reviews: { id: string; rating: number; comment: string | null; username: string; first_name: string; created_at: string }[] }>(`/products/${productId}/reviews`),
 },
 upload: {
   image: async (token: string, file: File): Promise<ApiResponse<{ path: string }>> => {

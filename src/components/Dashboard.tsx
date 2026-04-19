@@ -3,12 +3,14 @@ import { useState } from "react";
 import Sidebar, { SidebarPage } from "./Sidebar";
 import DashboardHome from "./dashboard/DashboardHome";
 import DashboardProducts from "./dashboard/DashboardProducts";
+import ProductDetail from "./dashboard/ProductDetail";
+import EditProduct from "./dashboard/EditProduct";
 import DashboardSettings from "./dashboard/DashboardSettings";
 import AddProduct from "./dashboard/AddProduct";
 import styles from "./Dashboard.module.css";
 import { useLang } from "@/context/LangContext";
 
-type Page = SidebarPage | "addProduct";
+type Page = SidebarPage | "addProduct" | "productDetail" | "editProduct";
 
 const placeholderIcons: Record<string, string> = {
   messages: "💬", contacts: "📇",
@@ -17,9 +19,12 @@ const placeholderIcons: Record<string, string> = {
 
 export default function Dashboard() {
   const [page, setPage] = useState<Page>("dashboard");
+  const [selectedProductId, setSelectedProductId] = useState<string>("");
   const { t } = useLang();
 
-  const sidebarActive: SidebarPage = page === "addProduct" ? "products" : page as SidebarPage;
+  const sidebarActive: SidebarPage =
+    page === "addProduct" || page === "productDetail" || page === "editProduct"
+      ? "products" : page as SidebarPage;
 
   const handleNavigate = (p: SidebarPage) => { setPage(p); };
 
@@ -31,15 +36,33 @@ export default function Dashboard() {
           <DashboardHome onAddProduct={() => setPage("addProduct")} />
         )}
         {page === "products" && (
-          <DashboardProducts onAddProduct={() => setPage("addProduct")} onEditProduct={(id) => { /* TODO: edit page */ }} />
+          <DashboardProducts
+            onAddProduct={() => setPage("addProduct")}
+            onViewProduct={(id) => { setSelectedProductId(id); setPage("productDetail"); }}
+          />
         )}
-        {page === "settings" && (
-          <DashboardSettings />
+        {page === "productDetail" && (
+          <ProductDetail
+            productId={selectedProductId}
+            onBack={() => setPage("products")}
+            onEdit={() => setPage("editProduct")}
+            onDeleted={() => setPage("products")}
+          />
+        )}
+        {page === "editProduct" && (
+          <EditProduct
+            productId={selectedProductId}
+            onBack={() => setPage("productDetail")}
+            onSuccess={() => setPage("productDetail")}
+          />
         )}
         {page === "addProduct" && (
           <AddProduct onBack={() => setPage("dashboard")} onSuccess={() => setPage("products")} />
         )}
-        {page !== "dashboard" && page !== "products" && page !== "settings" && page !== "addProduct" && (
+        {page === "settings" && (
+          <DashboardSettings />
+        )}
+        {page !== "dashboard" && page !== "products" && page !== "productDetail" && page !== "editProduct" && page !== "addProduct" && page !== "settings" && (
           <div className={styles.placeholder}>
             <span className={styles.placeholderIcon}>{placeholderIcons[page] || "📋"}</span>
             <h1 className={styles.placeholderTitle}>{t.sidebar[page as keyof typeof t.sidebar]}</h1>
