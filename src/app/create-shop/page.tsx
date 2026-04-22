@@ -12,6 +12,7 @@ import styles from "./page.module.css";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'\-]+$/;
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/merchant").replace(/\/merchant$/, "").replace(/\/api$/, "");
 
 interface CategoryResult { id: number; name: string; parentName: string; display: string; }
 interface Wilaya { code: number; name_fr: string; name_en: string; }
@@ -30,6 +31,26 @@ export default function CreateShop() {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [serverError, setServerError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Shop profile
+  const [profileImage, setProfileImage] = useState<string>("");
+  const [coverImage, setCoverImage] = useState<string>("");
+  const [profileFile, setProfileFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [shopAddress, setShopAddress] = useState("");
+  const [shopDescription, setShopDescription] = useState("");
+  const profileRef = useRef<HTMLInputElement>(null);
+  const coverRef = useRef<HTMLInputElement>(null);
+
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>, key: "profile" | "cover") => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (key === "profile") setProfileFile(file); else setCoverFile(file);
+    const reader = new FileReader();
+    reader.onload = () => { if (key === "profile") setProfileImage(reader.result as string); else setCoverImage(reader.result as string); };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
 
   // Company check
   const [companyAvail, setCompanyAvail] = useState<boolean | null>(null);
@@ -190,6 +211,8 @@ export default function CreateShop() {
       first_name: form.firstName, last_name: form.lastName,
       company_name: form.companyName, category_id: selectedCategory.id,
       wilaya_code: selectedWilaya.code,
+      address: shopAddress.trim() || undefined,
+      description: shopDescription.trim() || undefined,
       sells_buys: sellsBuys, offers_services: offersServices,
       has_physical_shop: hasPhysicalShop, offers_delivery: offersDelivery,
       delivery_wilayas: dwCodes,
@@ -215,7 +238,24 @@ export default function CreateShop() {
     setVerifyLoading(false);
     if (res.error) { setVerifyError(t.createShop.verifyError); return; }
     if (res.data) {
-      login(res.data.accessToken, res.data.user as Parameters<typeof login>[1]);
+      const token = res.data.accessToken;
+      const userData = res.data.user as Parameters<typeof login>[1];
+
+      // Upload profile/cover images now that we have a token
+      const updates: Record<string, string> = {};
+      if (profileFile) {
+        const upRes = await api.upload.image(token, profileFile);
+        if (upRes.data?.path) updates.profile_image = `${API_BASE}${upRes.data.path}`;
+      }
+      if (coverFile) {
+        const upRes = await api.upload.image(token, coverFile);
+        if (upRes.data?.path) updates.cover_image = `${API_BASE}${upRes.data.path}`;
+      }
+      if (Object.keys(updates).length > 0) {
+        await api.auth.updateProfile(token, { password: form.password, updates });
+      }
+
+      login(token, userData);
       setVerifySuccess(true);
       setTimeout(() => router.push("/"), 2000);
     }
@@ -256,6 +296,48 @@ export default function CreateShop() {
               {checkingCompany && <p className={styles.checkText}>...</p>}
               {!checkingCompany && form.companyName.length >= 2 && companyAvail === false && <p className={styles.errorText}>{tc.companyError}</p>}
               {!checkingCompany && form.companyName.length >= 2 && companyAvail === true && <p className={styles.okText}>✓</p>}
+            </div>
+
+            {/* Profile & Cover photos */}
+            <div className={styles.field}>
+              <label className={styles.label}>{tc.profileImage}</label>
+              <div className={styles.photosRow}>
+                <div className={styles.photoBox}>
+                  <input type="file" accept="image/jpeg,image/png" ref={profileRef} className={styles.fileInput} onChange={(e) => onFileChange(e, "profile")} />
+                  {profileImage ? (
+                    <img src={profileImage} alt="Profile" className={styles.photoPreview} />
+                  ) : (
+                    <div className={styles.photoPlaceholder}>
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="1.5"><circle cx="12" cy="8" r="4"/><path d="M20 21c0-4.418-3.582-8-8-8s-8 3.582-8 8"/></svg>
+                    </div>
+                  )}
+                  <button type="button" className={styles.photoAddBtn} onClick={() => profileRef.current?.click()}><span className={styles.photoAddPlus}>+</span></button>
+                </div>
+                <div className={styles.photoBoxWide}>
+                  <input type="file" accept="image/jpeg,image/png" ref={coverRef} className={styles.fileInput} onChange={(e) => onFileChange(e, "cover")} />
+                  <label className={styles.photoBoxLabel}>{tc.coverImage}</label>
+                  {coverImage ? (
+                    <img src={coverImage} alt="Cover" className={styles.photoPreview} />
+                  ) : (
+                    <div className={styles.photoPlaceholder}>
+                      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                    </div>
+                  )}
+                  <button type="button" className={styles.photoAddBtn} onClick={() => coverRef.current?.click()}><span className={styles.photoAddPlus}>+</span></button>
+                </div>
+              </div>
+            </div>
+
+            {/* Address */}
+            <div className={styles.field}>
+              <label className={styles.label}>{tc.shopAddress}</label>
+              <input type="text" className={styles.input} placeholder={tc.shopAddressPlaceholder} value={shopAddress} onChange={(e) => setShopAddress(e.target.value)} />
+            </div>
+
+            {/* Description */}
+            <div className={styles.field}>
+              <label className={styles.label}>{tc.shopDescription}</label>
+              <textarea className={styles.textarea} placeholder={tc.shopDescriptionPlaceholder} value={shopDescription} onChange={(e) => setShopDescription(e.target.value)} rows={4} />
             </div>
 
             {/* Category autocomplete */}

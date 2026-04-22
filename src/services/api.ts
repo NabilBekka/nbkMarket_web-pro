@@ -9,7 +9,7 @@ async function requestBase<T>(endpoint: string, options: RequestInit = {}): Prom
 }
 function authH(token: string) { return { Authorization: `Bearer ${token}` }; }
 export const api = { auth: {
-  register: (b: { email: string; password: string; first_name: string; last_name: string; company_name: string; category_id?: number; wilaya_code?: number; sells_buys?: boolean; offers_services?: boolean; has_physical_shop?: boolean; offers_delivery?: boolean; delivery_wilayas?: number[]; lang?: string }) => request("/auth/register", { method: "POST", body: JSON.stringify(b) }),
+  register: (b: { email: string; password: string; first_name: string; last_name: string; company_name: string; category_id?: number; wilaya_code?: number; profile_image?: string; cover_image?: string; address?: string; description?: string; sells_buys?: boolean; offers_services?: boolean; has_physical_shop?: boolean; offers_delivery?: boolean; delivery_wilayas?: number[]; lang?: string }) => request("/auth/register", { method: "POST", body: JSON.stringify(b) }),
   verifyEmail: (b: { email: string; code: string }) => request<{ accessToken: string; user: Record<string, unknown> }>("/auth/verify-email", { method: "POST", body: JSON.stringify(b) }),
   resendCode: (b: { email: string }) => request("/auth/resend-code", { method: "POST", body: JSON.stringify(b) }),
   checkCompany: (name: string) => request<{ available: boolean }>(`/auth/check-company/${encodeURIComponent(name)}`),
