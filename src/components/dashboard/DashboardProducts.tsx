@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import styles from "./DashboardProducts.module.css";
 import { useLang } from "@/context/LangContext";
 import { useAuth } from "@/context/AuthContext";
@@ -13,9 +13,10 @@ interface Product {
 const PER_PAGE = 8;
 
 export default function DashboardProducts({ onAddProduct, onViewProduct }: { onAddProduct: () => void; onViewProduct: (id: string) => void }) {
-  const { t } = useLang();
+  const { lang, t } = useLang();
   const { accessToken } = useAuth();
-  const [products, setProducts] = useState<Product[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [searchResults, setSearchResults] = useState<Product[] | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState("");
@@ -24,36 +25,56 @@ export default function DashboardProducts({ onAddProduct, onViewProduct }: { onA
   const [priceMax, setPriceMax] = useState("");
   const [ratingFilter, setRatingFilter] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const searchTimer = useRef<NodeJS.Timeout | null>(null);
 
+  // Load all products initially
   useEffect(() => {
     if (!accessToken) return;
     (async () => {
       setLoading(true);
       const res = await api.products.getMyProducts(accessToken);
-      if (res.data?.products) setProducts(res.data.products as unknown as Product[]);
+      if (res.data?.products) setAllProducts(res.data.products as unknown as Product[]);
       setLoading(false);
     })();
   }, [accessToken]);
 
+  // Debounced fuzzy search
+  useEffect(() => {
+    if (!accessToken) return;
+    if (search.trim().length === 0) { setSearchResults(null); return; }
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(async () => {
+      const res = await api.products.getMyProducts(accessToken, search.trim(), lang);
+      if (res.data?.products) setSearchResults(res.data.products as unknown as Product[]);
+    }, 300);
+  }, [search, lang, accessToken]);
+
+  // Use search results if searching, otherwise all products
+  const baseList = searchResults !== null ? searchResults : allProducts;
+
+  // Apply local filters (price, rating) + sort
   const filtered = useMemo(() => {
-    let list = [...products];
-    if (search.trim()) { const q = search.toLowerCase(); list = list.filter(p => p.title.toLowerCase().includes(q)); }
+    let list = [...baseList];
     const min = parseFloat(priceMin); const max = parseFloat(priceMax);
     if (!isNaN(min)) list = list.filter(p => p.price >= min);
     if (!isNaN(max)) list = list.filter(p => p.price <= max);
     if (ratingFilter > 0) list = list.filter(p => p.avg_rating !== null && p.avg_rating >= ratingFilter);
-    switch (sort) {
-      case "az": list.sort((a, b) => a.title.localeCompare(b.title)); break;
-      case "za": list.sort((a, b) => b.title.localeCompare(a.title)); break;
-      case "priceAsc": list.sort((a, b) => a.price - b.price); break;
-      case "priceDesc": list.sort((a, b) => b.price - a.price); break;
-      case "bestRated": list.sort((a, b) => (b.avg_rating ?? 0) - (a.avg_rating ?? 0)); break;
-      case "newest": list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()); break;
-      case "oldest": list.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()); break;
-      case "lastCommented": list.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()); break;
+
+    // If searching, keep relevance order from server. Otherwise sort locally.
+    if (searchResults === null) {
+      switch (sort) {
+        case "az": list.sort((a, b) => a.title.localeCompare(b.title)); break;
+        case "za": list.sort((a, b) => b.title.localeCompare(a.title)); break;
+        case "priceAsc": list.sort((a, b) => a.price - b.price); break;
+        case "priceDesc": list.sort((a, b) => b.price - a.price); break;
+        case "bestRated": list.sort((a, b) => (b.avg_rating ?? 0) - (a.avg_rating ?? 0)); break;
+        case "newest": list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()); break;
+        case "oldest": list.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()); break;
+        case "lastCommented": list.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()); break;
+      }
     }
     return list;
-  }, [products, search, sort, priceMin, priceMax, ratingFilter]);
+  }, [baseList, sort, priceMin, priceMax, ratingFilter, searchResults]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
   const safePage = Math.min(currentPage, totalPages);

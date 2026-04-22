@@ -26,8 +26,13 @@ export const api = { auth: {
 products: {
   create: (t: string, b: { title: string; description: string; price: number; main_image: string; image_2?: string; image_3?: string }) =>
     requestBase<{ product: Record<string, unknown> }>("/products", { method: "POST", headers: authH(t), body: JSON.stringify(b) }),
-  getMyProducts: (t: string) =>
-    requestBase<{ products: Record<string, unknown>[] }>("/products/my/list", { headers: authH(t) }),
+  getMyProducts: (t: string, q?: string, lang?: string) => {
+    const params = new URLSearchParams();
+    if (q && q.trim()) params.set("q", q.trim());
+    if (lang) params.set("lang", lang);
+    const qs = params.toString();
+    return requestBase<{ products: Record<string, unknown>[] }>(`/products/my/list${qs ? `?${qs}` : ""}`, { headers: authH(t) });
+  },
   getById: (id: string) =>
     requestBase<{ product: Record<string, unknown> }>(`/products/${id}`),
   update: (t: string, id: string, b: Record<string, unknown>) =>
