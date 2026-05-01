@@ -14,6 +14,8 @@ export default function AddProduct({ onBack, onSuccess }: { onBack: () => void; 
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
+  const [keywords, setKeywords] = useState<string[]>([]);
+  const [keywordInput, setKeywordInput] = useState("");
   const [mainImage, setMainImage] = useState("");
   const [image2, setImage2] = useState("");
   const [image3, setImage3] = useState("");
@@ -29,6 +31,16 @@ export default function AddProduct({ onBack, onSuccess }: { onBack: () => void; 
   const img3Ref = useRef<HTMLInputElement>(null);
 
   const touch = (k: string) => setTouched(p => ({ ...p, [k]: true }));
+
+  const addKeyword = (e: React.KeyboardEvent) => {
+    if ((e.key === "Enter" || e.key === ",") && keywordInput.trim()) {
+      e.preventDefault();
+      const kw = keywordInput.trim().toLowerCase();
+      if (!keywords.includes(kw)) setKeywords(prev => [...prev, kw]);
+      setKeywordInput("");
+    }
+  };
+  const removeKeyword = (kw: string) => setKeywords(prev => prev.filter(k => k !== kw));
 
   const handleUpload = async (file: File, key: "main" | "img2" | "img3") => {
     if (!accessToken) return;
@@ -67,6 +79,7 @@ export default function AddProduct({ onBack, onSuccess }: { onBack: () => void; 
     const res = await api.products.create(accessToken, {
       title: title.trim(),
       description: description.trim(),
+      keywords: keywords.join(", "),
       price: priceNum,
       main_image: mainImage,
       image_2: image2 || undefined,
@@ -154,6 +167,19 @@ export default function AddProduct({ onBack, onSuccess }: { onBack: () => void; 
             <label className={styles.label}>{t.addProductForm.description} *</label>
             <textarea className={`${styles.textarea} ${touched.description && !descriptionValid ? styles.inputError : ""}`} placeholder={t.addProductForm.descriptionPlaceholder} value={description} onChange={(e) => setDescription(e.target.value)} onBlur={() => touch("description")} rows={5} />
             {touched.description && !descriptionValid && <p className={styles.errorText}>{t.addProductForm.required}</p>}
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label}>{t.addProductForm.keywords}</label>
+            <p className={styles.hintText}>{t.addProductForm.keywordsHint}</p>
+            {keywords.length > 0 && (
+              <div className={styles.keywordChips}>
+                {keywords.map(kw => (
+                  <span key={kw} className={styles.keywordChip}>{kw} <button type="button" className={styles.keywordRemove} onClick={() => removeKeyword(kw)}>✕</button></span>
+                ))}
+              </div>
+            )}
+            <input type="text" className={styles.input} placeholder={t.addProductForm.keywordsPlaceholder} value={keywordInput} onChange={(e) => setKeywordInput(e.target.value)} onKeyDown={addKeyword} />
           </div>
 
           <button type="submit" className={styles.submitBtn} disabled={loading || !allValid}>

@@ -8,7 +8,7 @@ import { api } from "@/services/api";
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/merchant").replace(/\/merchant$/, "").replace(/\/api$/, "");
 
 interface Product {
-  id: string; title: string; description: string; price: number;
+  id: string; title: string; description: string; keywords: string; price: number;
   main_image: string; image_2: string | null; image_3: string | null;
 }
 
@@ -19,6 +19,8 @@ export default function EditProduct({ productId, onBack, onSuccess }: { productI
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
+  const [keywords, setKeywords] = useState<string[]>([]);
+  const [keywordInput, setKeywordInput] = useState("");
   const [mainImage, setMainImage] = useState("");
   const [image2, setImage2] = useState("");
   const [image3, setImage3] = useState("");
@@ -36,6 +38,16 @@ export default function EditProduct({ productId, onBack, onSuccess }: { productI
 
   const touch = (k: string) => setTouched(p => ({ ...p, [k]: true }));
 
+  const addKeyword = (e: React.KeyboardEvent) => {
+    if ((e.key === "Enter" || e.key === ",") && keywordInput.trim()) {
+      e.preventDefault();
+      const kw = keywordInput.trim().toLowerCase();
+      if (!keywords.includes(kw)) setKeywords(prev => [...prev, kw]);
+      setKeywordInput("");
+    }
+  };
+  const removeKeyword = (kw: string) => setKeywords(prev => prev.filter(k => k !== kw));
+
   // Load existing product
   useEffect(() => {
     (async () => {
@@ -45,6 +57,7 @@ export default function EditProduct({ productId, onBack, onSuccess }: { productI
         setTitle(p.title);
         setPrice(p.price.toString());
         setDescription(p.description);
+        setKeywords(p.keywords ? p.keywords.split(",").map(k => k.trim()).filter(Boolean) : []);
         setMainImage(p.main_image);
         setImage2(p.image_2 || "");
         setImage3(p.image_3 || "");
@@ -90,6 +103,7 @@ export default function EditProduct({ productId, onBack, onSuccess }: { productI
     const res = await api.products.update(accessToken, productId, {
       title: title.trim(),
       description: description.trim(),
+      keywords: keywords.join(", "),
       price: priceNum,
       main_image: mainImage,
       image_2: image2 || null,
@@ -168,6 +182,19 @@ export default function EditProduct({ productId, onBack, onSuccess }: { productI
             <label className={styles.label}>{t.addProductForm.description} *</label>
             <textarea className={`${styles.textarea} ${touched.description && !descriptionValid ? styles.inputError : ""}`} placeholder={t.addProductForm.descriptionPlaceholder} value={description} onChange={(e) => setDescription(e.target.value)} onBlur={() => touch("description")} rows={5} />
             {touched.description && !descriptionValid && <p className={styles.errorText}>{t.addProductForm.required}</p>}
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label}>{t.addProductForm.keywords}</label>
+            <p className={styles.hintText}>{t.addProductForm.keywordsHint}</p>
+            {keywords.length > 0 && (
+              <div className={styles.keywordChips}>
+                {keywords.map(kw => (
+                  <span key={kw} className={styles.keywordChip}>{kw} <button type="button" className={styles.keywordRemove} onClick={() => removeKeyword(kw)}>✕</button></span>
+                ))}
+              </div>
+            )}
+            <input type="text" className={styles.input} placeholder={t.addProductForm.keywordsPlaceholder} value={keywordInput} onChange={(e) => setKeywordInput(e.target.value)} onKeyDown={addKeyword} />
           </div>
 
           <button type="submit" className={styles.submitBtn} disabled={saving || !allValid}>

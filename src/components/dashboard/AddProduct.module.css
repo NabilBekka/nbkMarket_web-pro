@@ -144,3 +144,17 @@
   .imagesRow { gap: 10px; }
   .imageBox { width: 100px; height: 100px; }
 }
+
+/* Keywords */
+.hintText { font-size: 11px; color: #bbb; margin-bottom: 6px; margin-top: -2px; }
+.keywordChips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.keywordChip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; background: var(--bg-gray); border: 1px solid var(--card-border);
+  border-radius: 16px; font-size: 12px; color: var(--text-dark); font-weight: 500;
+}
+.keywordRemove {
+  background: none; border: none; color: #E53935; font-size: 12px;
+  cursor: pointer; padding: 0; font-weight: 700; line-height: 1;
+}
+.keywordRemove:hover { opacity: 0.7; }

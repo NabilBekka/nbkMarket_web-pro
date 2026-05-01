@@ -31,7 +31,7 @@ shop: {
   getReviews: (merchantId: string) => requestBase<{ reviews: { id: string; rating: number; comment: string | null; username: string; first_name: string; created_at: string }[]; avg_rating: number | null; review_count: number }>(`/merchants/${merchantId}/reviews`),
 },
 products: {
-  create: (t: string, b: { title: string; description: string; price: number; main_image: string; image_2?: string; image_3?: string }) =>
+  create: (t: string, b: { title: string; description: string; keywords?: string; price: number; main_image: string; image_2?: string; image_3?: string }) =>
     requestBase<{ product: Record<string, unknown> }>("/products", { method: "POST", headers: authH(t), body: JSON.stringify(b) }),
   getMyProducts: (t: string, q?: string, lang?: string) => {
     const params = new URLSearchParams();
