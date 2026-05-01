@@ -22,6 +22,13 @@ export const api = { auth: {
   updateProfile: (t: string, b: { password: string; updates: Record<string, string> }) => request<{ user: Record<string, unknown> }>("/auth/profile", { method: "PUT", headers: authH(t), body: JSON.stringify(b) }),
   deleteAccount: (t: string, b: { password: string }) => request("/auth/account", { method: "DELETE", headers: authH(t), body: JSON.stringify(b) }),
   updateLang: (t: string, b: { lang: string }) => request("/auth/lang", { method: "PUT", headers: authH(t), body: JSON.stringify(b) }),
+  updateImages: (t: string, b: { profile_image?: string; cover_image?: string; description?: string; address?: string }) => request<{ user: Record<string, unknown> }>("/auth/update-images", { method: "PUT", headers: authH(t), body: JSON.stringify(b) }),
+  updateDeliveryWilayas: (t: string, codes: number[]) => request<{ wilayas: { code: number; name_fr: string; name_en: string }[] }>("/auth/update-delivery-wilayas", { method: "PUT", headers: authH(t), body: JSON.stringify({ delivery_wilayas: codes }) }),
+  getDeliveryWilayas: (t: string) => request<{ wilayas: { code: number; name_fr: string; name_en: string }[] }>("/auth/delivery-wilayas", { headers: authH(t) }),
+},
+shop: {
+  getInfo: (merchantId: string) => requestBase<{ shop: Record<string, unknown>; }>(`/merchants/${merchantId}`),
+  getReviews: (merchantId: string) => requestBase<{ reviews: { id: string; rating: number; comment: string | null; username: string; first_name: string; created_at: string }[]; avg_rating: number | null; review_count: number }>(`/merchants/${merchantId}/reviews`),
 },
 products: {
   create: (t: string, b: { title: string; description: string; price: number; main_image: string; image_2?: string; image_3?: string }) =>
