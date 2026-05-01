@@ -68,6 +68,7 @@ export const fr = {
     keywords: "Mots-clés",
     keywordsPlaceholder: "Tapez un mot-clé et appuyez sur Entrée...",
     keywordsHint: "Les mots-clés aident votre produit à apparaître dans les résultats de recherche",
+    keywordsAdd: "Ajouter",
     submit: "Ajouter le produit",
     success: "Produit ajouté avec succès !",
     back: "← Retour",

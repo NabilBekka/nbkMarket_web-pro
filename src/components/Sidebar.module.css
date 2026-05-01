@@ -52,6 +52,7 @@
   cursor: pointer;
   transition: all 0.15s;
   text-align: left;
+  text-decoration: none;
 }
 
 .navItem:hover {

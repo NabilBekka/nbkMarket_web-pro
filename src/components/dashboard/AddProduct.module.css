@@ -158,3 +158,11 @@
   cursor: pointer; padding: 0; font-weight: 700; line-height: 1;
 }
 .keywordRemove:hover { opacity: 0.7; }
+.keywordInputRow { display: flex; gap: 8px; }
+.keywordInputRow .input { flex: 1; }
+.keywordAddBtn {
+  padding: 9px 18px; border: none; border-radius: 8px;
+  background: var(--green-dark); color: var(--white); font-size: 13px; font-weight: 600;
+  cursor: pointer; white-space: nowrap; transition: opacity 0.15s;
+}
+.keywordAddBtn:hover { opacity: 0.85; }

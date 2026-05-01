@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./AddProduct.module.css";
 import { useLang } from "@/context/LangContext";
 import { useAuth } from "@/context/AuthContext";
@@ -7,7 +8,8 @@ import { api } from "@/services/api";
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/merchant").replace(/\/merchant$/, "").replace(/\/api$/, "");
 
-export default function AddProduct({ onBack, onSuccess }: { onBack: () => void; onSuccess: () => void }) {
+export default function AddProduct() {
+  const router = useRouter();
   const { t } = useLang();
   const { accessToken } = useAuth();
 
@@ -35,10 +37,13 @@ export default function AddProduct({ onBack, onSuccess }: { onBack: () => void; 
   const addKeyword = (e: React.KeyboardEvent) => {
     if ((e.key === "Enter" || e.key === ",") && keywordInput.trim()) {
       e.preventDefault();
-      const kw = keywordInput.trim().toLowerCase();
-      if (!keywords.includes(kw)) setKeywords(prev => [...prev, kw]);
-      setKeywordInput("");
+      submitKeyword();
     }
+  };
+  const submitKeyword = () => {
+    const kw = keywordInput.trim().toLowerCase();
+    if (kw && !keywords.includes(kw)) setKeywords(prev => [...prev, kw]);
+    setKeywordInput("");
   };
   const removeKeyword = (kw: string) => setKeywords(prev => prev.filter(k => k !== kw));
 
@@ -89,7 +94,7 @@ export default function AddProduct({ onBack, onSuccess }: { onBack: () => void; 
 
     if (res.error) { setServerError(res.error); return; }
     setSuccess(true);
-    setTimeout(onSuccess, 1500);
+    setTimeout(() => router.push("/products"), 1500);
   };
 
   const renderImageBox = (
@@ -134,7 +139,7 @@ export default function AddProduct({ onBack, onSuccess }: { onBack: () => void; 
 
   return (
     <div className={styles.container}>
-      <button className={styles.backBtn} onClick={onBack}>{t.addProductForm.back}</button>
+      <button className={styles.backBtn} onClick={() => router.push("/products")}>{t.addProductForm.back}</button>
       <h1 className={styles.title}>{t.addProductForm.title}</h1>
 
       {success ? (
@@ -179,7 +184,10 @@ export default function AddProduct({ onBack, onSuccess }: { onBack: () => void; 
                 ))}
               </div>
             )}
-            <input type="text" className={styles.input} placeholder={t.addProductForm.keywordsPlaceholder} value={keywordInput} onChange={(e) => setKeywordInput(e.target.value)} onKeyDown={addKeyword} />
+            <div className={styles.keywordInputRow}>
+              <input type="text" className={styles.input} placeholder={t.addProductForm.keywordsPlaceholder} value={keywordInput} onChange={(e) => setKeywordInput(e.target.value)} onKeyDown={addKeyword} />
+              <button type="button" className={styles.keywordAddBtn} onClick={submitKeyword}>{t.addProductForm.keywordsAdd}</button>
+            </div>
           </div>
 
           <button type="submit" className={styles.submitBtn} disabled={loading || !allValid}>

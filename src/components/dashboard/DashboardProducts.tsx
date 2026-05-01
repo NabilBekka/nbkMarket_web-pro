@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useMemo, useRef } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./DashboardProducts.module.css";
 import { useLang } from "@/context/LangContext";
 import { useAuth } from "@/context/AuthContext";
@@ -12,7 +13,8 @@ interface Product {
 
 const PER_PAGE = 8;
 
-export default function DashboardProducts({ onAddProduct, onViewProduct }: { onAddProduct: () => void; onViewProduct: (id: string) => void }) {
+export default function DashboardProducts() {
+  const router = useRouter();
   const { lang, t } = useLang();
   const { accessToken } = useAuth();
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -88,7 +90,7 @@ export default function DashboardProducts({ onAddProduct, onViewProduct }: { onA
     <div className={styles.container}>
       <div className={styles.topBar}>
         <h1 className={styles.title}>{t.sidebar.products}</h1>
-        <button className={styles.addBtn} onClick={onAddProduct}>{t.dashboard.addProduct}</button>
+        <button className={styles.addBtn} onClick={() => router.push("/products/add")}>{t.dashboard.addProduct}</button>
       </div>
 
       <div className={styles.filtersCard}>
@@ -131,7 +133,7 @@ export default function DashboardProducts({ onAddProduct, onViewProduct }: { onA
       ) : (
         <div className={styles.cardsGrid}>
           {paginated.map(p => (
-            <button key={p.id} className={styles.card} onClick={() => onViewProduct(p.id)}>
+            <button key={p.id} className={styles.card} onClick={() => router.push(`/products/${p.id}`)}>
               <img src={p.main_image} alt={p.title} className={styles.cardImage} onError={(e) => { (e.target as HTMLImageElement).src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='200' height='200' fill='%23f0f0f0'/><text x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23ccc' font-size='40'>📷</text></svg>"; }} />
               <div className={styles.cardBody}>
                 <span className={styles.cardTitle}>{p.title}</span>

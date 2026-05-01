@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./ProductDetail.module.css";
 import { useLang } from "@/context/LangContext";
 import { useAuth } from "@/context/AuthContext";
@@ -16,9 +17,8 @@ interface Review {
   username: string; first_name: string; created_at: string;
 }
 
-export default function ProductDetail({ productId, onBack, onEdit, onDeleted }: {
-  productId: string; onBack: () => void; onEdit: () => void; onDeleted: () => void;
-}) {
+export default function ProductDetail({ productId }: { productId: string }) {
+  const router = useRouter();
   const { t } = useLang();
   const { accessToken } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
@@ -51,7 +51,7 @@ export default function ProductDetail({ productId, onBack, onEdit, onDeleted }: 
     await api.products.remove(accessToken, productId);
     setDeleteLoading(false);
     setShowDeleteModal(false);
-    onDeleted();
+    router.push("/products");
   };
 
   const td = t.productDetail;
@@ -63,10 +63,10 @@ export default function ProductDetail({ productId, onBack, onEdit, onDeleted }: 
 
   return (
     <div className={styles.container}>
-      <button className={styles.backBtn} onClick={onBack}>← {td.back}</button>
+      <button className={styles.backBtn} onClick={() => router.push("/products")}>← {td.back}</button>
 
       <div className={styles.actions}>
-        <button className={styles.editBtn} onClick={onEdit}>{td.edit}</button>
+        <button className={styles.editBtn} onClick={() => router.push(`/products/${productId}/edit`)}>{td.edit}</button>
         <button className={styles.deleteBtn} onClick={() => setShowDeleteModal(true)}>{td.delete}</button>
       </div>
 

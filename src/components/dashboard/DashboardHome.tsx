@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import styles from "./DashboardHome.module.css";
 import { useLang } from "@/context/LangContext";
 import { useAuth } from "@/context/AuthContext";
@@ -16,7 +17,8 @@ const mockTopProducts = [
   { name: "Jean Slim", views: 32, price: 4200, color: "#7E57C2" },
 ];
 
-export default function DashboardHome({ onAddProduct }: { onAddProduct: () => void }) {
+export default function DashboardHome() {
+  const router = useRouter();
   const { t } = useLang();
   const { user } = useAuth();
 
@@ -41,7 +43,7 @@ export default function DashboardHome({ onAddProduct }: { onAddProduct: () => vo
           <h1 className={styles.greeting}>{t.dashboard.welcome} {user.first_name} 👋</h1>
           <p className={styles.companyName}>{user.company_name}</p>
         </div>
-        <button className={styles.addBtn} onClick={onAddProduct}>{t.dashboard.addProduct}</button>
+        <button className={styles.addBtn} onClick={() => router.push("/products/add")}>{t.dashboard.addProduct}</button>
       </div>
 
       {/* Stats */}

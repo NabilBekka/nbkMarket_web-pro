@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import Dashboard from "@/components/Dashboard";
 import { useLang } from "@/context/LangContext";
 import { useAuth } from "@/context/AuthContext";
 import styles from "./page.module.css";
@@ -10,10 +11,13 @@ import styles from "./page.module.css";
 export default function Home() {
   const { t } = useLang();
   const { user, isLoading } = useAuth();
+  const router = useRouter();
 
-  if (isLoading) return null;
+  useEffect(() => {
+    if (!isLoading && user) router.replace("/dashboard");
+  }, [isLoading, user, router]);
 
-  if (user) return <Dashboard />;
+  if (isLoading || user) return null;
 
   return (
     <main>

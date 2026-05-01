@@ -68,6 +68,7 @@ export const en = {
     keywords: "Keywords",
     keywordsPlaceholder: "Type a keyword and press Enter...",
     keywordsHint: "Keywords help your product appear in search results",
+    keywordsAdd: "Add",
     submit: "Add product",
     success: "Product added successfully!",
     back: "← Back",
